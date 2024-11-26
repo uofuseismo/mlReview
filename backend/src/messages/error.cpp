@@ -1,42 +1,86 @@
 #include <nlohmann/json.hpp>
 #include "drp/messages/error.hpp"
-//#include "compress.hpp"
 
 using namespace DRP::Messages;
 
 class Error::ErrorImpl
 {
 public:
-    nlohmann::json pack() const
-    {
-        nlohmann::json object;
-        object["MessageType"] = "DRP::Messages::Error"; 
-        if (!mDetails.empty())
-        {
-            object["Details"] = mDetails;
-        }
-        if (mHaveCode)
-        {
-            object["ErrorCode"] = mCode;
-        }
-        return object;
-    }
-    std::string mDetails;
-    int mCode;
-    bool mHaveCode{false};
+    std::string mMessage;
+    int mStatusCode{400};
+    bool mSuccess{false};
 };
 
-/// Construtor
+/// Constructor
 Error::Error() :
     pImpl(std::make_unique<ErrorImpl> ())
 {
 }
 
+/// Copy constructor
+Error::Error(const Error &error)
+{
+    *this = error;
+}
+
+/// Move constructor
+Error::Error(Error &&error) noexcept
+{
+    *this = std::move(error);
+}
+
+/// Copy assignment
+Error& Error::operator=(const Error &error)
+{
+    if (&error == this){return *this;}
+    pImpl = std::make_unique<ErrorImpl> (*error.pImpl);
+    return *this;
+}
+
+/// Move assignment
+Error& Error::operator=(Error &&error) noexcept
+{
+    if (&error == this){return *this;}
+    pImpl = std::move(error.pImpl);
+    return *this;
+}
+
 /// Destructor
 Error::~Error() = default;
 
-/// Pack
-std::string Error::toString() const noexcept
+/// Error details
+void Error::setMessage(const std::string &details) noexcept
 {
-    return pImpl->pack().dump(-1);
+    pImpl->mMessage = details;
+}
+
+std::optional<std::string> Error::getMessage() const noexcept
+{
+    return !pImpl->mMessage.empty() ?
+           std::optional<std::string> (pImpl->mMessage) : std::nullopt;
+}
+
+/// Copy this class
+std::unique_ptr<DRP::Messages::IMessage> Error::clone() const
+{
+    std::unique_ptr<DRP::Messages::IMessage> result
+        = std::make_unique<Error> (*this);
+    return result;
+}
+
+/// Error code
+void Error::setStatusCode(const int code) noexcept
+{
+    pImpl->mStatusCode = code;
+}
+
+int Error::getStatusCode() const noexcept
+{
+    return pImpl->mStatusCode;
+}
+
+/// Success?
+bool Error::getSuccess() const noexcept
+{
+    return pImpl->mSuccess;
 }
