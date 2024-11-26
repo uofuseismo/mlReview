@@ -4,6 +4,7 @@ enable_testing()
 
 option(ENABLE_SSL "Enable SSL connections" OFF)
 option(UUSS_SRC "Enable UUSS-specific source" ON)
+option(COMPILE_DATABASE_UTILITIES "Utilites for interacting with the datbase" OFF)
 #cmake -DBUILD_SHARED_LIBS=YES /path/to/source
 set(BUILD_SHARED_LIBS YES)
 
@@ -147,56 +148,60 @@ set_target_properties(drpBackend PROPERTIES
                       CXX_STANDARD_REQUIRED YES 
                       CXX_EXTENSIONS NO) 
 target_compile_definitions(drpBackend PUBLIC ENABLE_CORS)
-if (${ENABLE_SSL})
+if (${OPENSSL_FOUND})
+   message("Linking to SSL")
    target_compile_definitions(drpBackend PUBLIC WITH_OPENSSL)
    target_link_libraries(drpBackend PRIVATE OpenSSL::SSL OpenSSL::Crypto)
 endif()
 if (${ZLIB_FOUND})
+   message("Linking to libz")
    target_compile_definitions(drpBackend PUBLIC WITH_ZLIB)
    target_link_libraries(drpBackend PRIVATE ${ZLIB_LIBRARIES})
    #target_include_directories(drpBackend PRIVATE ${ZLIB_INCLUDE_DIRS})
 endif()
 
-add_executable(eventBuilder
-               src/eventBuilder.cpp)
-target_link_libraries(eventBuilder
-                      PRIVATE drp
-                              SOCI::soci_postgresql
-                              Boost::date_time
-                              Boost::program_options
-                              spdlog::spdlog
-                              mongo::mongocxx_shared mongo::bsoncxx_shared)
-target_include_directories(eventBuilder
-                           PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src
-                                   ${CMAKE_CURRENT_SOURCE_DIR}/include
-                                   ${PostgreSQL_INCLUDE_DIRS}
-                                   ${OPENLDAP_INCLUDE_DIR}
-                                   ${CURL_INCLUDE_DIR}
-                                   ${MINISEED_INCLUDE_DIR}
-                                   Boost::headers)
-set_target_properties(eventBuilder PROPERTIES
-                      CXX_STANDARD 20
-                      CXX_STANDARD_REQUIRED YES 
-                      CXX_EXTENSIONS NO) 
+if (${COMPILE_DATABASE_UTILITIES})
+  add_executable(eventBuilder
+                 src/eventBuilder.cpp)
+  target_link_libraries(eventBuilder
+                        PRIVATE drp
+                                SOCI::soci_postgresql
+                                Boost::date_time
+                                Boost::program_options
+                                spdlog::spdlog
+                                mongo::mongocxx_shared mongo::bsoncxx_shared)
+  target_include_directories(eventBuilder
+                             PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src
+                                     ${CMAKE_CURRENT_SOURCE_DIR}/include
+                                     ${PostgreSQL_INCLUDE_DIRS}
+                                     ${OPENLDAP_INCLUDE_DIR}
+                                     ${CURL_INCLUDE_DIR}
+                                     ${MINISEED_INCLUDE_DIR}
+                                     Boost::headers)
+  set_target_properties(eventBuilder PROPERTIES
+                        CXX_STANDARD 20
+                        CXX_STANDARD_REQUIRED YES 
+                        CXX_EXTENSIONS NO) 
 
-add_executable(createEvent
-               src/createEvent.cpp)
-target_link_libraries(createEvent
-                      PRIVATE drp 
-                              SOCI::soci_postgresql
-                              Boost::date_time
-                              Boost::program_options
-                              spdlog::spdlog
-                              mongo::mongocxx_shared mongo::bsoncxx_shared)
-target_include_directories(createEvent
-                           PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src
-                                   ${CMAKE_CURRENT_SOURCE_DIR}/include
-                                   ${PostgreSQL_INCLUDE_DIRS}
-                                   Boost::headers)
-set_target_properties(createEvent PROPERTIES
-                      CXX_STANDARD 20
-                      CXX_STANDARD_REQUIRED YES 
-                      CXX_EXTENSIONS NO) 
+  add_executable(createEvent
+                 src/createEvent.cpp)
+  target_link_libraries(createEvent
+                        PRIVATE drp 
+                                SOCI::soci_postgresql
+                                Boost::date_time
+                                Boost::program_options
+                                spdlog::spdlog
+                                mongo::mongocxx_shared mongo::bsoncxx_shared)
+  target_include_directories(createEvent
+                             PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src
+                                     ${CMAKE_CURRENT_SOURCE_DIR}/include
+                                     ${PostgreSQL_INCLUDE_DIRS}
+                                     Boost::headers)
+  set_target_properties(createEvent PROPERTIES
+                        CXX_STANDARD 20
+                        CXX_STANDARD_REQUIRED YES 
+                        CXX_EXTENSIONS NO) 
+endif()
 
 
 ##########################################################################################
