@@ -16,10 +16,12 @@
 #include "drp/database/connection/postgresql.hpp"
 #include "drp/database/connection/mongodb.hpp"
 #include "drp/messages/error.hpp"
+#ifdef WITH_SFF
 #include "sff/utilities/time.hpp"
 #include "sff/hypoinverse2000/eventSummary.hpp"
 #include "sff/hypoinverse2000/eventSummaryLine.hpp"
 #include "sff/hypoinverse2000/stationArchiveLine.hpp"
+#endif
 
 #define RESOURCE_NAME "catalog"
 #define COLLECTION_NAME "events"
@@ -37,6 +39,7 @@ std::chrono::seconds now()
            (now.time_since_epoch());
 }
 
+#ifdef WITH_SFF
 std::string eventToHypoInverse2000(const Event &event)
 {
     SFF::HypoInverse2000::EventSummary eventSummary; 
@@ -111,6 +114,7 @@ std::string eventToHypoInverse2000(const Event &event)
     eventSummary.setEventInformation(eventSummaryLine);
     return eventSummary.packString();
 }
+#endif
 
 nlohmann::json toObject(const std::vector<Event> &events)
 {
