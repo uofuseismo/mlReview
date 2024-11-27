@@ -36,6 +36,35 @@ struct SavedWaveforms
     std::chrono::seconds lastUpdate{::now()};
 };
 
+std::optional<int64_t> getOldestEvent(
+    const std::map<int64_t, ::SavedWaveforms> &map)
+{
+    if (map.empty()){return std::nullopt;}
+    int64_t oldestEvent = map.begin()->first;
+    auto oldestTime = map.begin()->second.lastUpdate;
+    for (const auto &it : map)
+    {
+        if (it.second.lastUpdate < oldestTime)
+        {
+            oldestEvent = it.first;
+            oldestTime = it.second.lastUpdate;
+        }
+    }
+    return std::optional<int64_t> (oldestEvent);
+}
+
+void purgeOldestEventFromMap(std::map<int64_t, ::SavedWaveforms> &map)
+{
+    if (map.empty()){return;}
+    auto oldestEvent = ::getOldestEvent(map);
+    if (oldestEvent)
+    {
+        spdlog::debug("Purging " + std::to_string(*oldestEvent)
+                   + " from waveform map");
+        map.erase(*oldestEvent);
+    }
+}
+
 nlohmann::json toObject(const std::vector<DRP::WaveServer::Waveform> &waveforms)
 {
     nlohmann::json result;
@@ -259,6 +288,19 @@ public:
         auto insertLocation = mSavedWaveformsMap.find(identifier);
         if (insertLocation == mSavedWaveformsMap.end())
         {
+            if (mSavedWaveformsMap.size() > mMaxNumberOfEvents)
+            {
+                try
+                {
+                    ::purgeOldestEventFromMap(mSavedWaveformsMap);
+                }
+                catch (const std::exception &e)
+                {
+                    spdlog::critical(
+                        "Failed to purge oldest event; failed with "
+                       + std::string {e.what()});
+                }
+            }
             mSavedWaveformsMap.insert(
                 std::pair {identifier, std::move(savedWaveforms)});
         }
@@ -276,6 +318,7 @@ public:
     std::shared_ptr<DRP::Database::Connection::MongoDB>
         mMongoDBConnection{nullptr};
     std::string mCollectionName{COLLECTION_NAME};
+    size_t mMaxNumberOfEvents{32};
 };
 
 /// Constructor

@@ -16,6 +16,7 @@
 #include <boost/optional.hpp>
 #include <spdlog/spdlog.h>
 #include <uAuthenticator/authenticator.hpp>
+#include <uAuthenticator/credentials.hpp>
 #include "drp/service/handler.hpp"
 #include "drp/messages/message.hpp"
 #include "drp/messages/error.hpp"
@@ -667,13 +668,79 @@ public:
                                    = credentials.substr(splitIndex + 1,
                                                         credentials.length());
                                authenticated = true;
-                               spdlog::info("Allowing: " + userName);//  + " " + password);
+                               constexpr UAuthenticator::Permissions
+                                   permissions{UAuthenticator::
+                                               Permissions::ReadWrite};
+                               if (mAuthenticator)
+                               {
+                                   auto authenticationStatus
+                                       = mAuthenticator->authenticate(userName,
+                                                                      password,
+                                                                      permissions);
+                                   if (authenticationStatus ==
+                                       UAuthenticator::IAuthenticator::
+                                       ReturnCode::Allowed)
+                                   {
+                                       spdlog::info("Allowing " + userName);
+                                   }
+                                   else if (authenticationStatus ==
+                                            UAuthenticator::IAuthenticator::
+                                            ReturnCode::Denied)
+                                   {
+                                       spdlog::warn("Blocking " + userName);
+                                       authenticated = false;
+                                   }
+                                   else
+                                   {
+                                       spdlog::critical(
+                                          "Internal authentication error for user " + userName);
+                                       return queueWrite(::createInternalServerErrorResponse(
+                                          "Server error - authentication failed",
+                                           mParser->release()));
+                                   }
+                               }
+                               else
+                               {
+                                   spdlog::info("No authentication; allowing: "
+                                              + userName);//  + " " + password);
+                               }
                            }
                        }
                    }
                    else if (authorizationType == "BEARER")
                    {
                        authenticated = false;
+                       spdlog::critical("BEARER not yet done");
+                       return queueWrite(::createInternalServerErrorResponse(
+                                         "BEARER auth not yet implemented",
+                                          mParser->release()));
+                       if (mAuthenticator)
+                       {
+std::string jsonWebToken;
+                           auto credentials = mAuthenticator->authorize(jsonWebToken);
+                           if (credentials)
+                           {
+                               auto userName = credentials->getUser();
+                               if (userName)
+                               {
+                                   spdlog::info("Authorizing " + *userName);
+                               }
+                               else
+                               {
+                                   spdlog::info("Authorizing unknonw user");
+                               }
+                               authenticated = true;
+                           }
+                           else
+                           {
+                               spdlog::info("Authorization failed");
+                               authenticated = false;
+                           } 
+                       }
+                       else
+                       {
+                           spdlog::info("No authentication; authorizing");
+                       }
                    }
                 }
             }
@@ -1010,7 +1077,6 @@ private:
 
         if (result)
         {
-/*
             // Launch SSL session
             std::make_shared<::SSLHTTPSession>(
                 std::move(mStream),
@@ -1020,7 +1086,6 @@ private:
                 mCallbackHandler,
                 mAuthenticator)->run();
             return;
-*/
         }
         // Launch plain session
         std::make_shared<::PlainHTTPSession>(
