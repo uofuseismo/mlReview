@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.20)
-project(DRPBackend VERSION 0.1.0 LANGUAGES CXX)
+project(MLReviewBackend VERSION 0.1.0 LANGUAGES CXX)
 enable_testing()
 
 option(ENABLE_SSL "Enable SSL connections" OFF)
@@ -67,14 +67,14 @@ if (${DataLinkClient_FOUND})
    message("Found DataLinkClient library")
    set(LIBRARY_SRC ${LIBRARY_SRC} src/waveServer/dataLink.cpp)
 endif()
-add_library(drp ${LIBRARY_SRC})
-target_link_libraries(drp
+add_library(mlReview ${LIBRARY_SRC})
+target_link_libraries(mlReview
                       PRIVATE SOCI::soci_postgresql SOCI::soci_sqlite3
                               mongo::mongocxx_shared mongo::bsoncxx_shared
                               GeographicLib::GeographicLib
                               nlohmann_json::nlohmann_json ${LIBXML2_LIBRARIES}
                               ${CURL_LIBRARIES} ${LDAP_LIBRARY} ${LBER_LIBRARY} ${MINISEED_LIBRARY} ${DataLinkClient_LIBRARY})
-target_include_directories(drp
+target_include_directories(mlReview
                            PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src
                                    ${CMAKE_CURRENT_SOURCE_DIR}/include
                                    ${PostgreSQL_INCLUDE_DIRS}
@@ -83,19 +83,19 @@ target_include_directories(drp
                                    ${DataLinkClient_INCLUDE_DIR}
                                    ${LIBXML2_INCLUDE_DIR}
                                    Boost::headers)
-set_target_properties(drp PROPERTIES
+set_target_properties(mlReview PROPERTIES
                       CXX_STANDARD 20
                       CXX_STANDARD_REQUIRED YES
                       CXX_EXTENSIONS NO)
 if (${SFF_FOUND})
    message("Found SFF")
-   target_compile_definitions(drp PRIVATE WITH_SFF)
-   target_include_directories(drp PRIVATE ${SFF_INCLUDE_DIRECTORY})
-   target_link_libraries(drp PRIVATE ${SFF_LIBRARY})
+   target_compile_definitions(mlReview PRIVATE WITH_SFF)
+   target_include_directories(mlReview PRIVATE ${SFF_INCLUDE_DIRECTORY})
+   target_link_libraries(mlReview PRIVATE ${SFF_LIBRARY})
 endif()
 
 
-add_executable(drpBackend
+add_executable(mlReviewBackend
                src/main.cpp
 #               src/database/postgresql.cpp
                src/service/handler.cpp
@@ -120,8 +120,8 @@ add_executable(drpBackend
 #               src/authenticator.cpp
 #               src/permissions.cpp)
 
-target_link_libraries(drpBackend
-                      PRIVATE drp
+target_link_libraries(mlReviewBackend
+                      PRIVATE mlReview
                               SOCI::soci_postgresql SOCI::soci_sqlite3
                               Boost::date_time
                               Boost::program_options
@@ -134,7 +134,7 @@ target_link_libraries(drpBackend
                               #jwt-cpp::jwt-cpp
                               ${uAuthenticator_LIBRARY}
                               ${CURL_LIBRARIES} ${LDAP_LIBRARY} ${LBER_LIBRARY} ${MINISEED_LIBRARY} ${SFF_LIBRARY})
-target_include_directories(drpBackend
+target_include_directories(mlReviewBackend
                            PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src
                                    ${CMAKE_CURRENT_SOURCE_DIR}/include
                                    ${PostgreSQL_INCLUDE_DIRS}
@@ -143,28 +143,28 @@ target_include_directories(drpBackend
                                    ${MINISEED_INCLUDE_DIR}
                                    ${uAuthenticator_INCLUDE_DIR}
                                    Boost::headers)
-set_target_properties(drpBackend PROPERTIES
+set_target_properties(mlReviewBackend PROPERTIES
                       CXX_STANDARD 20
                       CXX_STANDARD_REQUIRED YES 
                       CXX_EXTENSIONS NO) 
-target_compile_definitions(drpBackend PUBLIC ENABLE_CORS)
+target_compile_definitions(mlReviewBackend PUBLIC ENABLE_CORS)
 if (${OPENSSL_FOUND})
    message("Linking to SSL")
-   target_compile_definitions(drpBackend PUBLIC WITH_OPENSSL)
-   target_link_libraries(drpBackend PRIVATE OpenSSL::SSL OpenSSL::Crypto)
+   target_compile_definitions(mlReviewBackend PUBLIC WITH_OPENSSL)
+   target_link_libraries(mlReviewBackend PRIVATE OpenSSL::SSL OpenSSL::Crypto)
 endif()
 if (${ZLIB_FOUND})
    message("Linking to libz")
-   target_compile_definitions(drpBackend PUBLIC WITH_ZLIB)
-   target_link_libraries(drpBackend PRIVATE ${ZLIB_LIBRARIES})
-   #target_include_directories(drpBackend PRIVATE ${ZLIB_INCLUDE_DIRS})
+   target_compile_definitions(mlReviewBackend PUBLIC WITH_ZLIB)
+   target_link_libraries(mlReviewBackend PRIVATE ${ZLIB_LIBRARIES})
+   #target_include_directories(mlReviewBackend PRIVATE ${ZLIB_INCLUDE_DIRS})
 endif()
 
 if (${COMPILE_DATABASE_UTILITIES})
   add_executable(eventBuilder
                  src/eventBuilder.cpp)
   target_link_libraries(eventBuilder
-                        PRIVATE drp
+                        PRIVATE mlReview 
                                 SOCI::soci_postgresql
                                 Boost::date_time
                                 Boost::program_options
@@ -186,7 +186,7 @@ if (${COMPILE_DATABASE_UTILITIES})
   add_executable(createEvent
                  src/createEvent.cpp)
   target_link_libraries(createEvent
-                        PRIVATE drp 
+                        PRIVATE mlReview
                                 SOCI::soci_postgresql
                                 Boost::date_time
                                 Boost::program_options
@@ -217,14 +217,14 @@ include(CMakePackageConfigHelpers)
 #    VERSION "${version}"
 #    COMPATIBILITY AnyNewerVersion
 #)
-install(TARGETS drpBackend
+install(TARGETS mlReviewBackend
         EXPORT ${PROJECT_NAME}-targets
         RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
         LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
         ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
         PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
         COMPONENT Runtime)
-#install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include/drpBackend
+#install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include/mlReviewBackend
 #        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 export(EXPORT ${PROJECT_NAME}-targets
        FILE "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}Targets.cmake")
