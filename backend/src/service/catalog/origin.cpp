@@ -5,12 +5,12 @@
 #include <chrono>
 #include <nlohmann/json.hpp>
 #include <spdlog/spdlog.h>
-#include "drp/service/catalog/origin.hpp"
-#include "drp/service/catalog/arrival.hpp"
-#include "drp/service/catalog/magnitude.hpp"
+#include "mlReview/service/catalog/origin.hpp"
+#include "mlReview/service/catalog/arrival.hpp"
+#include "mlReview/service/catalog/magnitude.hpp"
 #include "private/lonTo180.hpp"
 
-using namespace DRP::Service::Catalog;
+using namespace MLReview::Service::Catalog;
 
 namespace
 {
@@ -265,7 +265,7 @@ Origin::EventType Origin::getEventType() const noexcept
 }
 
 /// To object
-nlohmann::json DRP::Service::Catalog::toObject(const Origin &origin)
+nlohmann::json MLReview::Service::Catalog::toObject(const Origin &origin)
 {
     nlohmann::json result;
     result["time"] = origin.getTime().count()*1.e-6;

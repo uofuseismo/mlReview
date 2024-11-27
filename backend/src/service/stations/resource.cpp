@@ -5,15 +5,15 @@
 #include <spdlog/spdlog.h>
 #include <nlohmann/json.hpp>
 #include <soci/soci.h>
-#include "drp/service/stations/resource.hpp"
-#include "drp/service/stations/response.hpp"
-#include "drp/service/stations/station.hpp"
-#include "drp/database/connection/postgresql.hpp"
-#include "drp/messages/error.hpp"
+#include "mlReview/service/stations/resource.hpp"
+#include "mlReview/service/stations/response.hpp"
+#include "mlReview/service/stations/station.hpp"
+#include "mlReview/database/connection/postgresql.hpp"
+#include "mlReview/messages/error.hpp"
 
 #define RESOURCE_NAME "stations"
 
-using namespace DRP::Service::Stations;
+using namespace MLReview::Service::Stations;
 
 namespace
 {
@@ -73,7 +73,7 @@ nlohmann::json toObject(const std::vector<Station> &stations,
 
 /// Generates a catalog from the application database
 std::vector<Station>
-getStations(DRP::Database::Connection::PostgreSQL &connection)
+getStations(MLReview::Database::Connection::PostgreSQL &connection)
 {
     std::vector<Station> stations;
     if (!connection.isConnected())
@@ -126,7 +126,7 @@ class Resource::ResourceImpl
 {
 public:
     ResourceImpl(
-        std::shared_ptr<DRP::Database::Connection::PostgreSQL> &aqmsConnection) :
+        std::shared_ptr<MLReview::Database::Connection::PostgreSQL> &aqmsConnection) :
         mAQMSConnection(aqmsConnection)
     {
         mStations = getStations(*mAQMSConnection);
@@ -136,14 +136,14 @@ public:
         if (mQueryThread.joinable()){mQueryThread.join();}
     }
     std::thread mQueryThread;
-    std::shared_ptr<DRP::Database::Connection::PostgreSQL>
+    std::shared_ptr<MLReview::Database::Connection::PostgreSQL>
         mAQMSConnection{nullptr};
     std::vector<Station> mStations;
 };
 
 /// Constructor
 Resource::Resource(
-    std::shared_ptr<DRP::Database::Connection::PostgreSQL> &aqmsConnection) :
+    std::shared_ptr<MLReview::Database::Connection::PostgreSQL> &aqmsConnection) :
     pImpl(std::make_unique<ResourceImpl> (aqmsConnection))
 {
 }
@@ -158,7 +158,7 @@ std::string Resource::getName() const noexcept
 }
 
 /// Process request
-std::unique_ptr<DRP::Messages::IMessage> 
+std::unique_ptr<MLReview::Messages::IMessage> 
 Resource::processRequest(const nlohmann::json &request)
 {
     bool getActive{false};

@@ -1,7 +1,7 @@
 #include <cmath>
 #include <algorithm>
 #include <chrono>
-#include "drp/waveServer/request.hpp"
+#include "mlReview/waveServer/request.hpp"
 
 namespace
 {
@@ -14,7 +14,7 @@ std::string convertString(const std::string &input)
 }
 }
 
-using namespace DRP::WaveServer;
+using namespace MLReview::WaveServer;
 
 class Request::RequestImpl
 {
@@ -209,7 +209,7 @@ bool Request::haveStartAndEndTime() const noexcept
     return pImpl->mHaveStartAndEndTime;
 }
 
-bool DRP::WaveServer::operator==(const Request &lhs, const Request &rhs)
+bool MLReview::WaveServer::operator==(const Request &lhs, const Request &rhs)
 {
     if (lhs.haveNetwork() && rhs.haveNetwork())
     {
@@ -263,7 +263,7 @@ bool DRP::WaveServer::operator==(const Request &lhs, const Request &rhs)
     return true;
 }
 
-bool DRP::WaveServer::operator!=(const Request &lhs, const Request &rhs)
+bool MLReview::WaveServer::operator!=(const Request &lhs, const Request &rhs)
 {
     return !(lhs == rhs);
 }

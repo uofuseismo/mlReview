@@ -1,6 +1,6 @@
 #include <string>
 #include <boost/format.hpp>
-#include "drp/database/aqms/assocaro.hpp"
+#include "mlReview/database/aqms/assocaro.hpp"
 
 namespace
 {
@@ -15,7 +15,7 @@ std::string convertString(const std::string &input)
 
 }
 
-using namespace DRP::Database::AQMS;
+using namespace MLReview::Database::AQMS;
 
 class AssocArO::AssocArOImpl
 {
@@ -278,7 +278,7 @@ std::optional<double> AssocArO::getTravelTimeResidual() const noexcept
 }
 
 /// Insertion string
-std::string DRP::Database::AQMS::toInsertString(const AssocArO &assocaro)
+std::string MLReview::Database::AQMS::toInsertString(const AssocArO &assocaro)
 {
     if (!assocaro.haveAuthority())
     {

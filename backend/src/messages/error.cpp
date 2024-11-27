@@ -1,7 +1,7 @@
 #include <nlohmann/json.hpp>
-#include "drp/messages/error.hpp"
+#include "mlReview/messages/error.hpp"
 
-using namespace DRP::Messages;
+using namespace MLReview::Messages;
 
 class Error::ErrorImpl
 {
@@ -61,9 +61,9 @@ std::optional<std::string> Error::getMessage() const noexcept
 }
 
 /// Copy this class
-std::unique_ptr<DRP::Messages::IMessage> Error::clone() const
+std::unique_ptr<MLReview::Messages::IMessage> Error::clone() const
 {
-    std::unique_ptr<DRP::Messages::IMessage> result
+    std::unique_ptr<MLReview::Messages::IMessage> result
         = std::make_unique<Error> (*this);
     return result;
 }

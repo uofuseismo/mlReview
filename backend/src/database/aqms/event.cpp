@@ -1,6 +1,6 @@
 #include <string>
 #include <boost/format.hpp>
-#include "drp/database/aqms/event.hpp"
+#include "mlReview/database/aqms/event.hpp"
 
 namespace
 {
@@ -15,7 +15,7 @@ std::string convertString(const std::string &input)
 
 }
 
-using namespace DRP::Database::AQMS;
+using namespace MLReview::Database::AQMS;
 
 namespace
 {
@@ -299,7 +299,7 @@ bool Event::getSelectFlag() const noexcept
 }
 
 /// Insertion string
-std::string DRP::Database::AQMS::toInsertString(const Event &event)
+std::string MLReview::Database::AQMS::toInsertString(const Event &event)
 {
     if (!event.haveAuthority())
     {   

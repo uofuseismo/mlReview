@@ -1,8 +1,8 @@
 #include <string>
 #include <nlohmann/json.hpp>
-#include "drp/service/catalog/response.hpp"
+#include "mlReview/service/catalog/response.hpp"
 
-using namespace DRP::Service::Catalog;
+using namespace MLReview::Service::Catalog;
 
 class Response::ResponseImpl
 {

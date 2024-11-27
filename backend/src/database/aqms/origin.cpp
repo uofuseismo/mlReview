@@ -1,6 +1,6 @@
 #include <string>
 #include <boost/format.hpp>
-#include "drp/database/aqms/origin.hpp"
+#include "mlReview/database/aqms/origin.hpp"
 #include "private/lonTo180.hpp"
 
 namespace
@@ -16,7 +16,7 @@ std::string convertString(const std::string &input)
 
 }
 
-using namespace DRP::Database::AQMS;
+using namespace MLReview::Database::AQMS;
 
 namespace
 {
@@ -440,7 +440,7 @@ std::optional<double> Origin::getWeightedRootMeanSquaredError() const noexcept
 }
 
 /// Insertion string
-std::string DRP::Database::AQMS::toInsertString(const Origin &origin)
+std::string MLReview::Database::AQMS::toInsertString(const Origin &origin)
 {
     if (!origin.haveAuthority())
     {   

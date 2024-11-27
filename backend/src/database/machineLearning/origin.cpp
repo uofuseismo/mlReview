@@ -4,11 +4,11 @@
 #include <chrono>
 #include <nlohmann/json.hpp>
 #include <spdlog/spdlog.h>
-#include "drp/database/machineLearning/origin.hpp"
-#include "drp/database/machineLearning/arrival.hpp"
+#include "mlReview/database/machineLearning/origin.hpp"
+#include "mlReview/database/machineLearning/arrival.hpp"
 #include "private/lonTo180.hpp"
 
-using namespace DRP::Database::MachineLearning::RealTime;
+using namespace MLReview::Database::MachineLearning::RealTime;
 
 class Origin::OriginImpl
 {
@@ -281,7 +281,7 @@ std::vector<Arrival> Origin::getArrivals() const noexcept
 }
 
 /// JSON
-nlohmann::json DRP::Database::MachineLearning::RealTime::toObject(
+nlohmann::json MLReview::Database::MachineLearning::RealTime::toObject(
     const Origin &origin)
 {
     nlohmann::json result;

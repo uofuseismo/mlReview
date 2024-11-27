@@ -1,9 +1,9 @@
 #include <spdlog/spdlog.h>
-#include "drp/waveServer/client.hpp"
-#include "drp/waveServer/waveform.hpp"
-#include "drp/waveServer/request.hpp"
+#include "mlReview/waveServer/client.hpp"
+#include "mlReview/waveServer/waveform.hpp"
+#include "mlReview/waveServer/request.hpp"
 
-using namespace DRP::WaveServer;
+using namespace MLReview::WaveServer;
 
 /// Destructor
 IClient::~IClient() = default;

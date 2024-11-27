@@ -2,7 +2,7 @@
 #include <string>
 #include <algorithm>
 #include <boost/format.hpp>
-#include "drp/database/aqms/arrival.hpp"
+#include "mlReview/database/aqms/arrival.hpp"
 
 namespace
 {
@@ -17,7 +17,7 @@ std::string convertString(const std::string &input)
 
 }
 
-using namespace DRP::Database::AQMS;
+using namespace MLReview::Database::AQMS;
 
 class Arrival::ArrivalImpl
 {
@@ -298,7 +298,7 @@ std::optional<std::string> Arrival::getSubSource() const noexcept
 }
 
 /// Insertion string
-std::string DRP::Database::AQMS::toInsertString(const Arrival &arrival)
+std::string MLReview::Database::AQMS::toInsertString(const Arrival &arrival)
 {
     if (!arrival.haveStation())
     {

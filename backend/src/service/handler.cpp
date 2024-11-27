@@ -3,15 +3,15 @@
 #include <string>
 #include <map>
 #include <nlohmann/json.hpp>
-#include "drp/service/handler.hpp"
-#include "drp/service/resource.hpp"
-#include "drp/messages/error.hpp"
+#include "mlReview/service/handler.hpp"
+#include "mlReview/service/resource.hpp"
+#include "mlReview/messages/error.hpp"
 
-using namespace DRP::Service;
+using namespace MLReview::Service;
 
 namespace
 {
-class ResourcesMessage : public DRP::Messages::IMessage
+class ResourcesMessage : public MLReview::Messages::IMessage
 {
 public:
     explicit ResourcesMessage(std::vector<std::string> &&resources) :
@@ -36,7 +36,7 @@ public:
         return std::optional<std::string> (message);
     } 
     /*
-    std::unique_ptr<DRP::Messages::IMessage> clone() const
+    std::unique_ptr<MLReview::Messages::IMessage> clone() const
     {
         auto message = std::make_unique<::ResourcesMessage> (*this);
         return message;
@@ -101,13 +101,13 @@ std::vector<std::string> Handler::getResources() const noexcept
 }
 
 /// Processes a message
-std::unique_ptr<DRP::Messages::IMessage> 
+std::unique_ptr<MLReview::Messages::IMessage> 
 Handler::process(const std::string &request) const
 {
     // Empty message
     if (request.empty())
     {
-        auto response = std::make_unique <DRP::Messages::Error> (); 
+        auto response = std::make_unique <MLReview::Messages::Error> (); 
         response->setStatusCode(400);
         response->setMessage("request is empty");
         return response;
@@ -135,7 +135,7 @@ Handler::process(const std::string &request) const
         auto resource = pImpl->mResources.find(resourceName);
         if (resource == pImpl->mResources.end())
         {
-            auto response = std::make_unique <DRP::Messages::Error> ();
+            auto response = std::make_unique <MLReview::Messages::Error> ();
             response->setStatusCode(400);
             response->setMessage("resource: " + resourceName
                                + " does not exist");
@@ -148,7 +148,7 @@ Handler::process(const std::string &request) const
     }
     catch (const std::exception &e)
     {
-        auto response = std::make_unique <DRP::Messages::Error> (); 
+        auto response = std::make_unique <MLReview::Messages::Error> (); 
         response->setStatusCode(400);
         response->setMessage(std::string {e.what()});
         return response;
@@ -162,7 +162,7 @@ Handler::process(const std::string &request) const
     {
         spdlog::warn(e.what()); 
 */
-        auto response = std::make_unique <DRP::Messages::Error> ();
+        auto response = std::make_unique <MLReview::Messages::Error> ();
         response->setStatusCode(500);
 //        response->setMessage(std::string {e.what()});
         return response;

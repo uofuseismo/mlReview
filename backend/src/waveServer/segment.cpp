@@ -3,9 +3,9 @@
 #include <chrono>
 #include <vector>
 #include <nlohmann/json.hpp>
-#include "drp/waveServer/segment.hpp"
+#include "mlReview/waveServer/segment.hpp"
 
-using namespace DRP::WaveServer;
+using namespace MLReview::WaveServer;
 
 class Segment::SegmentImpl
 {
@@ -328,7 +328,7 @@ std::vector<U> Segment::getData() const
 }
 
 /// 
-nlohmann::json DRP::WaveServer::toObject(const Segment &segment)
+nlohmann::json MLReview::WaveServer::toObject(const Segment &segment)
 {
     if (!segment.haveSamplingRate())
     {
@@ -368,7 +368,7 @@ nlohmann::json DRP::WaveServer::toObject(const Segment &segment)
     return result;
 }
 
-template void DRP::WaveServer::Segment::getData(std::vector<double> *data) const;
-template void DRP::WaveServer::Segment::getData(std::vector<float> *data) const;
-template void DRP::WaveServer::Segment::getData(std::vector<int> *data) const;
-template void DRP::WaveServer::Segment::getData(std::vector<int64_t> *data) const;
+template void MLReview::WaveServer::Segment::getData(std::vector<double> *data) const;
+template void MLReview::WaveServer::Segment::getData(std::vector<float> *data) const;
+template void MLReview::WaveServer::Segment::getData(std::vector<int> *data) const;
+template void MLReview::WaveServer::Segment::getData(std::vector<int64_t> *data) const;

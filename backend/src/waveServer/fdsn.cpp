@@ -4,15 +4,15 @@
 #include <cmath>
 #include <chrono>
 #include <spdlog/spdlog.h>
-#include "drp/waveServer/fdsn.hpp"
-#include "drp/waveServer/request.hpp"
+#include "mlReview/waveServer/fdsn.hpp"
+#include "mlReview/waveServer/request.hpp"
 #include "curl.hpp"
 #include "unpackMiniSEED3.hpp"
 
 #define TYPE "FDSN"
 #define VERSION 1
 
-using namespace DRP::WaveServer;
+using namespace MLReview::WaveServer;
 
 namespace
 {

@@ -7,15 +7,15 @@
 #include <algorithm>
 #include <libmseed.h>
 #include <spdlog/spdlog.h>
-#include "drp/waveServer/waveform.hpp"
-#include "drp/waveServer/segment.hpp"
+#include "mlReview/waveServer/waveform.hpp"
+#include "mlReview/waveServer/segment.hpp"
 namespace
 {
 [[nodiscard]] 
-DRP::WaveServer::Waveform unpack(char *data, size_t dataLength,
-                                 const int8_t verbose = 0)
+MLReview::WaveServer::Waveform unpack(char *data, size_t dataLength,
+                                      const int8_t verbose = 0)
 {
-    DRP::WaveServer::Waveform result;
+    MLReview::WaveServer::Waveform result;
     auto bufferLength = static_cast<uint64_t> (dataLength);
     uint64_t offset{0};
     bool isFirst{true};
@@ -72,18 +72,18 @@ DRP::WaveServer::Waveform unpack(char *data, size_t dataLength,
             // Data
             auto nSamples = static_cast<int> (msr->numsamples);
             // Finally get the data
-            DRP::WaveServer::Segment::DataType dataType;
+            MLReview::WaveServer::Segment::DataType dataType;
             if (msr->sampletype == 'i')
             {
-                dataType = DRP::WaveServer::Segment::DataType::Integer32;
+                dataType = MLReview::WaveServer::Segment::DataType::Integer32;
             }
             else if (msr->sampletype == 'f')
             {
-                dataType = DRP::WaveServer::Segment::DataType::Float;
+                dataType = MLReview::WaveServer::Segment::DataType::Float;
             }
             else if (msr->sampletype == 'd')
             {
-                dataType = DRP::WaveServer::Segment::DataType::Double;
+                dataType = MLReview::WaveServer::Segment::DataType::Double;
             }
             else
             {
@@ -99,7 +99,7 @@ DRP::WaveServer::Waveform unpack(char *data, size_t dataLength,
             }
             try
             {
-                DRP::WaveServer::Segment segment;
+                MLReview::WaveServer::Segment segment;
                 segment.setStartTime(startTime);
                 segment.setSamplingRate(samplingRate); 
                 segment.setData(msr->datasamples, nSamples, dataType);
@@ -124,8 +124,8 @@ DRP::WaveServer::Waveform unpack(char *data, size_t dataLength,
     return result;
 }
 
-DRP::WaveServer::Waveform unpack(const std::string &data,
-                                 const int8_t verbose = 0)
+MLReview::WaveServer::Waveform unpack(const std::string &data,
+                                      const int8_t verbose = 0)
 {
     auto copy = data;
     auto bufferLength = static_cast<uint64_t> (data.size());    

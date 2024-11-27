@@ -1,9 +1,9 @@
 #include <string>
 #include <algorithm>
 #include <boost/format.hpp>
-#include "drp/database/aqms/credit.hpp"
+#include "mlReview/database/aqms/credit.hpp"
 
-using namespace DRP::Database::AQMS;
+using namespace MLReview::Database::AQMS;
 
 namespace
 {
@@ -155,7 +155,7 @@ void Credit::clear() noexcept
 Credit::~Credit() = default;
 
 /// Insertion string
-std::string DRP::Database::AQMS::toInsertString(const Credit &credit)
+std::string MLReview::Database::AQMS::toInsertString(const Credit &credit)
 {
     if (!credit.haveIdentifier())
     {

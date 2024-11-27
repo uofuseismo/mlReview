@@ -3,14 +3,14 @@
 #include <chrono>
 #include <cmath>
 #include <spdlog/spdlog.h>
-#include "drp/waveServer/multiClient.hpp"
-#include "drp/waveServer/waveform.hpp"
-#include "drp/waveServer/segment.hpp"
-#include "drp/waveServer/request.hpp"
+#include "mlReview/waveServer/multiClient.hpp"
+#include "mlReview/waveServer/waveform.hpp"
+#include "mlReview/waveServer/segment.hpp"
+#include "mlReview/waveServer/request.hpp"
 
 #define TYPE "MultiClient"
 
-using namespace DRP::WaveServer;
+using namespace MLReview::WaveServer;
 
 namespace
 {

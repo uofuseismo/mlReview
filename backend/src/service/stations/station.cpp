@@ -1,9 +1,9 @@
 #include <string>
 #include <chrono>
-#include "drp/service/stations/station.hpp"
+#include "mlReview/service/stations/station.hpp"
 #include "private/lonTo180.hpp"
 
-using namespace DRP::Service::Stations;
+using namespace MLReview::Service::Stations;
 
 class Station::StationImpl
 {
@@ -224,7 +224,7 @@ bool Station::isLocal() const
 }
 
 /// To object
-nlohmann::json DRP::Service::Stations::toObject(const Station &station)
+nlohmann::json MLReview::Service::Stations::toObject(const Station &station)
 {
     nlohmann::json result;
     result["network"] = station.getNetwork();

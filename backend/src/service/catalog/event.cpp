@@ -2,11 +2,11 @@
 #include <cmath>
 #include <vector>
 #include <spdlog/spdlog.h>
-#include "drp/service/catalog/event.hpp"
-#include "drp/service/catalog/origin.hpp"
-#include "drp/service/catalog/arrival.hpp"
+#include "mlReview/service/catalog/event.hpp"
+#include "mlReview/service/catalog/origin.hpp"
+#include "mlReview/service/catalog/arrival.hpp"
 
-using namespace DRP::Service::Catalog;
+using namespace MLReview::Service::Catalog;
 
 class Event::EventImpl
 {
@@ -243,7 +243,7 @@ std::optional<std::vector<int64_t>>
 }
 
 /// To object
-nlohmann::json DRP::Service::Catalog::toObject(const Event &event)
+nlohmann::json MLReview::Service::Catalog::toObject(const Event &event)
 {
     nlohmann::json result;
     result["eventIdentifier"] = std::to_string(event.getIdentifier());

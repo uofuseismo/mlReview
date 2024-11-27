@@ -4,8 +4,8 @@
 #include <chrono>
 #include <vector>
 #include <spdlog/spdlog.h>
-#include "drp/waveServer/segment.hpp"
-#include "drp/waveServer/waveform.hpp"
+#include "mlReview/waveServer/segment.hpp"
+#include "mlReview/waveServer/waveform.hpp"
 
 namespace
 {
@@ -18,8 +18,8 @@ std::string convertString(const std::string &input)
 }
 
 template<typename T>
-DRP::WaveServer::Segment merge(const DRP::WaveServer::Segment &segmentToAppend,
-                               const DRP::WaveServer::Segment &newSegment)
+MLReview::WaveServer::Segment merge(const MLReview::WaveServer::Segment &segmentToAppend,
+                                    const MLReview::WaveServer::Segment &newSegment)
 {
     auto result = segmentToAppend;
     std::vector<T> data0;
@@ -27,12 +27,12 @@ DRP::WaveServer::Segment merge(const DRP::WaveServer::Segment &segmentToAppend,
     segmentToAppend.getData(&data0);
     newSegment.getData(&data1);
     data0.insert(data0.end(), data1.begin(), data1.end());
-    result.setData(data0.data(), data0.size()); // TODO make a move operator
+    result.setData(std::move(data0)); //data0.data(), data0.size()); // TODO make a move operator
     return result;
 }
 }
 
-using namespace DRP::WaveServer;
+using namespace MLReview::WaveServer;
 
 class Waveform::WaveformImpl
 {
@@ -362,7 +362,7 @@ Waveform::const_iterator Waveform::cend() const noexcept
 }
 
 /// To object
-nlohmann::json DRP::WaveServer::toObject(const Waveform &waveform)
+nlohmann::json MLReview::WaveServer::toObject(const Waveform &waveform)
 {
     if (!waveform.haveNetwork())
     {

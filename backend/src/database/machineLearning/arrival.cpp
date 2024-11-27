@@ -3,10 +3,10 @@
 #include <chrono>
 #include <algorithm>
 #include <nlohmann/json.hpp>
-#include "drp/database/machineLearning/arrival.hpp"
+#include "mlReview/database/machineLearning/arrival.hpp"
 #include "private/isEmpty.hpp"
 
-using namespace DRP::Database::MachineLearning::RealTime;
+using namespace MLReview::Database::MachineLearning::RealTime;
 
 class Arrival::ArrivalImpl
 {
@@ -262,7 +262,7 @@ std::optional<double> Arrival::getResidual() const noexcept
 }
 
 /// JSON
-nlohmann::json DRP::Database::MachineLearning::RealTime::toObject(
+nlohmann::json MLReview::Database::MachineLearning::RealTime::toObject(
     const Arrival &arrival)
 {
     nlohmann::json result;

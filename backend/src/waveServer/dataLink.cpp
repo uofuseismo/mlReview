@@ -5,8 +5,8 @@
 #include <chrono>
 #include <libdali.h>
 #include <libxml/parser.h>
-#include "drp/waveServer/dataLink.hpp"
-#include "drp/waveServer/request.hpp"
+#include "mlReview/waveServer/dataLink.hpp"
+#include "mlReview/waveServer/request.hpp"
 #include "unpackMiniSEED3.hpp"
 
 #define TYPE "DataLink"
@@ -94,7 +94,7 @@ std::chrono::seconds now()
 }
 */
 
-using namespace DRP::WaveServer;
+using namespace MLReview::WaveServer;
 
 class DataLink::DataLinkImpl
 {

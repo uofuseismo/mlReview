@@ -7,17 +7,17 @@
 #include <nlohmann/json.hpp>
 #include <bsoncxx/json.hpp>
 #include <mongocxx/client.hpp>
-#include "drp/service/waveforms/resource.hpp"
-#include "drp/service/waveforms/response.hpp"
-#include "drp/database/connection/mongodb.hpp"
-#include "drp/waveServer/waveform.hpp"
-#include "drp/waveServer/segment.hpp"
-#include "drp/messages/error.hpp"
+#include "mlReview/service/waveforms/resource.hpp"
+#include "mlReview/service/waveforms/response.hpp"
+#include "mlReview/database/connection/mongodb.hpp"
+#include "mlReview/waveServer/waveform.hpp"
+#include "mlReview/waveServer/segment.hpp"
+#include "mlReview/messages/error.hpp"
 
 #define RESOURCE_NAME "waveforms"
 #define COLLECTION_NAME "events"
 
-using namespace DRP::Service::Waveforms;
+using namespace MLReview::Service::Waveforms;
 
 namespace
 {
@@ -31,7 +31,7 @@ std::chrono::seconds now()
 
 struct SavedWaveforms
 {
-    //std::vector<DRP::WaveServer::Waveform> waveforms;
+    //std::vector<MLReview::WaveServer::Waveform> waveforms;
     nlohmann::json jsonWaveforms;
     std::chrono::seconds lastUpdate{::now()};
 };
@@ -65,7 +65,7 @@ void purgeOldestEventFromMap(std::map<int64_t, ::SavedWaveforms> &map)
     }
 }
 
-nlohmann::json toObject(const std::vector<DRP::WaveServer::Waveform> &waveforms)
+nlohmann::json toObject(const std::vector<MLReview::WaveServer::Waveform> &waveforms)
 {
     nlohmann::json result;
     for (const auto &waveform : waveforms)
@@ -83,12 +83,12 @@ nlohmann::json toObject(const std::vector<DRP::WaveServer::Waveform> &waveforms)
 }
 
 /// Generates a catalog from the application database
-std::vector<DRP::WaveServer::Waveform>
-getWaveforms(DRP::Database::Connection::MongoDB &connection,
+std::vector<MLReview::WaveServer::Waveform>
+getWaveforms(MLReview::Database::Connection::MongoDB &connection,
              const int64_t identifier,
              const std::string &collectionName = "events")
 {
-    std::vector<DRP::WaveServer::Waveform> waveforms;
+    std::vector<MLReview::WaveServer::Waveform> waveforms;
     auto databaseName = connection.getDatabaseName();
     using namespace bsoncxx::builder::basic;
     auto client
@@ -120,7 +120,7 @@ getWaveforms(DRP::Database::Connection::MongoDB &connection,
                     {
                         for (const auto &waveformObject : jsonObject["waveformData"])
                         {
-                            DRP::WaveServer::Waveform waveform;
+                            MLReview::WaveServer::Waveform waveform;
                             auto network = waveformObject["network"].template get<std::string> ();
                             auto station = waveformObject["station"].template get<std::string> ();
                             auto channel = waveformObject["channel"].template get<std::string> ();
@@ -137,7 +137,7 @@ getWaveforms(DRP::Database::Connection::MongoDB &connection,
                             {
                                 for (const auto &segmentObject : waveformObject["segments"])
                                 {
-                                    DRP::WaveServer::Segment segment;
+                                    MLReview::WaveServer::Segment segment;
                                     auto iStartTime = segmentObject["startTimeMuS"].template get<int64_t> ();
                                     auto samplingRate = segmentObject["samplingRateHZ"].template get<double> ();
                                     segment.setStartTime(std::chrono::microseconds {iStartTime});
@@ -223,7 +223,7 @@ class Resource::ResourceImpl
 {
 public:
     ResourceImpl(
-        std::shared_ptr<DRP::Database::Connection::MongoDB> &mongoConnection) :
+        std::shared_ptr<MLReview::Database::Connection::MongoDB> &mongoConnection) :
         mMongoDBConnection(mongoConnection)
     {
         //getWaveforms(*mMongoDBConnection, 11861);
@@ -247,10 +247,10 @@ public:
         std::lock_guard<std::mutex> lockGuard(mMutex);
         return mSavedWaveformsMap.contains(identifier);
     }
-    [[nodiscard]] nlohmann::json //std::vector<DRP::WaveServer::Waveform>
+    [[nodiscard]] nlohmann::json //std::vector<MLReview::WaveServer::Waveform>
         queryAndUpdateWaveforms(const int64_t identifier)
     {
-        std::vector<DRP::WaveServer::Waveform> waveforms;
+        std::vector<MLReview::WaveServer::Waveform> waveforms;
         nlohmann::json jsonWaveforms;
         if (contains(identifier))
         {
@@ -315,7 +315,7 @@ public:
     mutable std::mutex mMutex;
     std::thread mQueryThread;
     std::map<int64_t, ::SavedWaveforms> mSavedWaveformsMap;
-    std::shared_ptr<DRP::Database::Connection::MongoDB>
+    std::shared_ptr<MLReview::Database::Connection::MongoDB>
         mMongoDBConnection{nullptr};
     std::string mCollectionName{COLLECTION_NAME};
     size_t mMaxNumberOfEvents{32};
@@ -323,7 +323,7 @@ public:
 
 /// Constructor
 Resource::Resource(
-    std::shared_ptr<DRP::Database::Connection::MongoDB> &mongoConnection) :
+    std::shared_ptr<MLReview::Database::Connection::MongoDB> &mongoConnection) :
     pImpl(std::make_unique<ResourceImpl> (mongoConnection))
 {
 }
@@ -338,7 +338,7 @@ std::string Resource::getName() const noexcept
 }
 
 /// Process request
-std::unique_ptr<DRP::Messages::IMessage> 
+std::unique_ptr<MLReview::Messages::IMessage> 
 Resource::processRequest(const nlohmann::json &request)
 {
     // Figure out the query information

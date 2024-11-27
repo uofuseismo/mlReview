@@ -5,9 +5,9 @@
 #include <mongocxx/uri.hpp>
 #include <nlohmann/json.hpp>
 #include <spdlog/spdlog.h>
-#include "drp/database/connection/mongodb.hpp"
+#include "mlReview/database/connection/mongodb.hpp"
 
-using namespace DRP::Database::Connection;
+using namespace MLReview::Database::Connection;
 
 class MongoDB::MongoDBImpl
 {

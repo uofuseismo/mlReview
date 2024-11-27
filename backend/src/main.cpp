@@ -2,25 +2,23 @@
 #include <vector>
 #include <memory>
 #include <thread>
+#include <boost/program_options.hpp>
 //#include <soci/soci.h>
 #include <spdlog/spdlog.h>
 #include <uAuthenticator/uAuthenticator.hpp>
-#include "drp/database/connection/postgresql.hpp"
-#include "drp/database/connection/mongodb.hpp"
-#include "drp/service/handler.hpp"
-#include "drp/service/catalog/resource.hpp"
-#include "drp/service/stations/resource.hpp"
-#include "drp/service/waveforms/resource.hpp"
-#include "drp/webServer/listener.hpp"
-//#include "drp/service/callback.hpp"
-//#include "drp/waveServer/fdsn.hpp"
-//#include "drp/waveServer/request.hpp"
+#include "mlReview/database/connection/postgresql.hpp"
+#include "mlReview/database/connection/mongodb.hpp"
+#include "mlReview/service/handler.hpp"
+#include "mlReview/service/catalog/resource.hpp"
+#include "mlReview/service/stations/resource.hpp"
+#include "mlReview/service/waveforms/resource.hpp"
+#include "mlReview/webServer/listener.hpp"
 
 namespace
 {
 
 /*
-void getWaveform(DRP::Database::Connection::PostgreSQL &connection)
+void getWaveform(MLReview::Database::Connection::PostgreSQL &connection)
 {
     auto session = reinterpret_cast<soci::session *> (connection.getSession());
     std::string data;
@@ -65,64 +63,37 @@ std::cout << std::getenv("LDAP_HOST") << std::endl;
     }
     return 0;
 */
-/*
-try
-{
-DRP::WaveServer::Request request;
-request.setNetwork("WY");
-request.setStation("YHH");
-request.setChannel("HHZ");
-request.setLocationCode("01");
-request.setStartAndEndTime(std::pair {1729212875, 1729212900});
-DRP::WaveServer::FDSN fdsn;//("http://mseedarch.seis.utah.edu:8080/");
-fdsn.getData(request);
-}
-catch (const std::exception &e)
-{
-spdlog::error(e.what());
-}
-*/
-/*
-    auto mlDatabaseConnection = std::make_unique<DRP::Database::Connection::PostgreSQL> ();
-    mlDatabaseConnection->setUser(std::getenv("DRP_ML_DATABASE_READ_ONLY_USER"));
-    mlDatabaseConnection->setPassword(std::getenv("DRP_ML_DATABASE_READ_ONLY_PASSWORD"));
-    mlDatabaseConnection->setDatabaseName(std::getenv("DRP_ML_DATABASE_NAME"));
-    mlDatabaseConnection->setAddress(std::getenv("DRP_ML_DATABASE_HOST"));
-    mlDatabaseConnection->setPort(std::stoi(std::getenv("DRP_ML_DATABASE_PORT")));
-    mlDatabaseConnection->setApplication("drpClientBackend");
-    mlDatabaseConnection->connect();
-*/
 
-    auto aqmsDatabaseConnection = std::make_shared<DRP::Database::Connection::PostgreSQL> ();
-    aqmsDatabaseConnection->setUser(std::getenv("DRP_AQMS_DATABASE_READ_ONLY_USER"));
-    aqmsDatabaseConnection->setPassword(std::getenv("DRP_AQMS_DATABASE_READ_ONLY_PASSWORD"));
-    aqmsDatabaseConnection->setDatabaseName(std::getenv("DRP_AQMS_DATABASE_NAME"));
-    aqmsDatabaseConnection->setAddress(std::getenv("DRP_AQMS_DATABASE_HOST"));
-    aqmsDatabaseConnection->setPort(std::stoi(std::getenv("DRP_AQMS_DATABASE_PORT")));
-    aqmsDatabaseConnection->setApplication("drpClientBackend");
+    auto aqmsDatabaseConnection = std::make_shared<MLReview::Database::Connection::PostgreSQL> ();
+    aqmsDatabaseConnection->setUser(std::getenv("MLREVIEW_AQMS_DATABASE_READ_ONLY_USER"));
+    aqmsDatabaseConnection->setPassword(std::getenv("MLREVEIW_AQMS_DATABASE_READ_ONLY_PASSWORD"));
+    aqmsDatabaseConnection->setDatabaseName(std::getenv("MLREVIEW_AQMS_DATABASE_NAME"));
+    aqmsDatabaseConnection->setAddress(std::getenv("MLREVIEW_AQMS_DATABASE_HOST"));
+    aqmsDatabaseConnection->setPort(std::stoi(std::getenv("MLREVIEW_AQMS_DATABASE_PORT")));
+    aqmsDatabaseConnection->setApplication("mlReviewClientBackend");
 
-    auto mongoDatabaseConnection = std::make_shared<DRP::Database::Connection::MongoDB> ();
-    mongoDatabaseConnection->setUser(std::getenv("DRP_MONGODB_DATABASE_READ_WRITE_USER"));
-    mongoDatabaseConnection->setPassword(std::getenv("DRP_MONGODB_DATABASE_READ_WRITE_PASSWORD"));
-    mongoDatabaseConnection->setDatabaseName(std::getenv("DRP_MONGODB_DATABASE_NAME"));
-    mongoDatabaseConnection->setAddress(std::getenv("DRP_MONGODB_DATABASE_HOST"));
-    mongoDatabaseConnection->setPort(std::stoi(std::getenv("DRP_MONGODB_DATABASE_PORT")));
-    mongoDatabaseConnection->setApplication("drpClientBackend");
+    auto mongoDatabaseConnection = std::make_shared<MLReview::Database::Connection::MongoDB> ();
+    mongoDatabaseConnection->setUser(std::getenv("MLREVIEW_MONGODB_DATABASE_READ_WRITE_USER"));
+    mongoDatabaseConnection->setPassword(std::getenv("MLREVIEW_MONGODB_DATABASE_READ_WRITE_PASSWORD"));
+    mongoDatabaseConnection->setDatabaseName(std::getenv("MLREVIEW_MONGODB_DATABASE_NAME"));
+    mongoDatabaseConnection->setAddress(std::getenv("MLREVIEW_MONGODB_DATABASE_HOST"));
+    mongoDatabaseConnection->setPort(std::stoi(std::getenv("MLREVIEW_MONGODB_DATABASE_PORT")));
+    mongoDatabaseConnection->setApplication("mlReviewClientBackend");
     mongoDatabaseConnection->connect();
 
     //getWaveform(*mlDatabaseConnection);
 
     auto catalogResource
-        = std::make_unique<DRP::Service::Catalog::Resource>
+        = std::make_unique<MLReview::Service::Catalog::Resource>
           (mongoDatabaseConnection);
     auto stationsResource
-        = std::make_unique<DRP::Service::Stations::Resource>
+        = std::make_unique<MLReview::Service::Stations::Resource>
           (aqmsDatabaseConnection);
     auto waveformsResource
-        = std::make_unique<DRP::Service::Waveforms::Resource>
+        = std::make_unique<MLReview::Service::Waveforms::Resource>
           (mongoDatabaseConnection);
 
-    auto handler = std::make_shared<DRP::Service::Handler> ();
+    auto handler = std::make_shared<MLReview::Service::Handler> ();
     handler->insert(std::move(catalogResource));
     handler->insert(std::move(stationsResource));
     handler->insert(std::move(waveformsResource));
@@ -139,7 +110,7 @@ spdlog::error(e.what());
 
     // Create and launch a listening port
     spdlog::info("Launching HTTP listeners...");
-    std::make_shared<DRP::WebServer::Listener> (
+    std::make_shared<MLReview::WebServer::Listener> (
         ioContext,
         context,
         boost::asio::ip::tcp::endpoint{address, port},

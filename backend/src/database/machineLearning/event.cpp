@@ -1,10 +1,10 @@
 #include <string>
 #include <vector>
 #include <chrono>
-#include "drp/database/machineLearning/event.hpp"
-#include "drp/database/machineLearning/origin.hpp"
+#include "mlReview/database/machineLearning/event.hpp"
+#include "mlReview/database/machineLearning/origin.hpp"
 
-using namespace DRP::Database::MachineLearning::RealTime;
+using namespace MLReview::Database::MachineLearning::RealTime;
 
 class Event::EventImpl
 {
@@ -146,7 +146,7 @@ std::optional<Origin> Event::getPreferredOrigin() const noexcept
 }
 
 /// JSON
-nlohmann::json DRP::Database::MachineLearning::RealTime::toObject(
+nlohmann::json MLReview::Database::MachineLearning::RealTime::toObject(
     const Event &event)
 {
     nlohmann::json result;

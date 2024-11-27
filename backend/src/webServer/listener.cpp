@@ -1,9 +1,9 @@
 #include <spdlog/spdlog.h>
-#include "drp/webServer/listener.hpp"
-#include "drp/service/handler.hpp"
+#include "mlReview/webServer/listener.hpp"
+#include "mlReview/service/handler.hpp"
 #include "server.hpp"
 
-using namespace DRP::WebServer;
+using namespace MLReview::WebServer;
 
 // Accepts incoming connections and launches the sessions
 Listener::Listener(
@@ -11,7 +11,7 @@ Listener::Listener(
         boost::asio::ssl::context &sslContext,
         boost::asio::ip::tcp::endpoint endpoint, 
         const std::shared_ptr<const std::string> &documentRoot,
-        std::shared_ptr<DRP::Service::Handler> &handler,
+        std::shared_ptr<MLReview::Service::Handler> &handler,
         std::shared_ptr<UAuthenticator::IAuthenticator> &authenticator) :
           mIOContext(ioContext),
           mSSLContext(sslContext),
@@ -90,7 +90,7 @@ void Listener::doAccept()
     mAcceptor.async_accept(
         boost::asio::make_strand(mIOContext),
         boost::beast::bind_front_handler(
-           &DRP::WebServer::Listener::onAccept,
+           &MLReview::WebServer::Listener::onAccept,
             shared_from_this()));
 }
 

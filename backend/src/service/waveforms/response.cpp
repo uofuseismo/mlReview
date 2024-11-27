@@ -1,8 +1,8 @@
 #include <string>
 #include <nlohmann/json.hpp>
-#include "drp/service/waveforms/response.hpp"
+#include "mlReview/service/waveforms/response.hpp"
 
-using namespace DRP::Service::Waveforms;
+using namespace MLReview::Service::Waveforms;
 
 class Response::ResponseImpl
 {

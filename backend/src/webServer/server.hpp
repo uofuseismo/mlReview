@@ -17,15 +17,15 @@
 #include <spdlog/spdlog.h>
 #include <uAuthenticator/authenticator.hpp>
 #include <uAuthenticator/credentials.hpp>
-#include "drp/service/handler.hpp"
-#include "drp/messages/message.hpp"
-#include "drp/messages/error.hpp"
+#include "mlReview/service/handler.hpp"
+#include "mlReview/messages/message.hpp"
+#include "mlReview/messages/error.hpp"
 #include "responses.hpp"
 
 #include "base64.hpp"
 #include <boost/algorithm/string.hpp>
 
-#define SERVICE_NAME "UUSS DRP"
+#define SERVICE_NAME "UUSS ML Review"
 
 namespace
 {
@@ -40,7 +40,7 @@ handleRequest(
     <
        Body, boost::beast::http::basic_fields<Allocator>
     > &&request,
-    std::shared_ptr<DRP::Service::Handler> &callbackHandler)
+    std::shared_ptr<MLReview::Service::Handler> &callbackHandler)
 {
 
     const auto successResponse = [&request](const std::string &payload)
@@ -167,7 +167,7 @@ handleRequest(
         auto responseMessage = callbackHandler->process(requestMessage);
         if (responseMessage)
         {
-            return successResponse(DRP::Messages::toJSON(responseMessage));
+            return successResponse(MLReview::Messages::toJSON(responseMessage));
         }
         else
         {
@@ -305,7 +305,7 @@ private:
                 = derived().getCallbackHandler()->process(requestMessage);
             if (responseMessage)
             {
-                reply(DRP::Messages::toJSON(responseMessage));
+                reply(MLReview::Messages::toJSON(responseMessage));
             }
             else
             {
@@ -325,10 +325,10 @@ private:
                        + std::string{e.what()});
             try
             {
-                DRP::Messages::Error errorMessage;
+                MLReview::Messages::Error errorMessage;
                 errorMessage.setStatusCode(500);
                 errorMessage.setMessage("server error - unhandled exception");
-                reply(DRP::Messages::toJSON(errorMessage.clone()));
+                reply(MLReview::Messages::toJSON(errorMessage.clone()));
             }
             catch (const std::exception &e)
             {
@@ -447,7 +447,7 @@ public:
     PlainWebSocketSession(
         const std::string sessionIdentifier, 
         boost::beast::tcp_stream &&stream,
-        std::shared_ptr<DRP::Service::Handler> &callbackHandler) :
+        std::shared_ptr<MLReview::Service::Handler> &callbackHandler) :
         mWebSocket(std::move(stream)),
         mCallbackHandler(callbackHandler),
         mSessionIdentifier(sessionIdentifier)
@@ -468,13 +468,13 @@ public:
     }
 
     // Called by the base class to get a handle to the callback handler
-    std::shared_ptr<DRP::Service::Handler> getCallbackHandler()
+    std::shared_ptr<MLReview::Service::Handler> getCallbackHandler()
     {
         return mCallbackHandler;
     }
 private:
     boost::beast::websocket::stream<boost::beast::tcp_stream> mWebSocket;
-    std::shared_ptr<DRP::Service::Handler> mCallbackHandler;
+    std::shared_ptr<MLReview::Service::Handler> mCallbackHandler;
     std::string mSessionIdentifier;
 };
 
@@ -488,7 +488,7 @@ public:
     SSLWebSocketSession(
         const std::string &sessionIdentifier,
         boost::asio::ssl::stream<boost::beast::tcp_stream> &&stream,
-        std::shared_ptr<DRP::Service::Handler> &callbackHandler) :
+        std::shared_ptr<MLReview::Service::Handler> &callbackHandler) :
         mWebSocket(std::move(stream)),
         mCallbackHandler(callbackHandler),
         mSessionIdentifier(sessionIdentifier)
@@ -511,7 +511,7 @@ public:
         return mWebSocket;
     }
 
-    std::shared_ptr<DRP::Service::Handler> getCallbackHandler()
+    std::shared_ptr<MLReview::Service::Handler> getCallbackHandler()
     {
         return mCallbackHandler;
     }
@@ -520,7 +520,7 @@ private:
     <
      boost::asio::ssl::stream<boost::beast::tcp_stream>
     > mWebSocket;
-    std::shared_ptr<DRP::Service::Handler> mCallbackHandler;
+    std::shared_ptr<MLReview::Service::Handler> mCallbackHandler;
     std::string mSessionIdentifier;
 };
 
@@ -530,7 +530,7 @@ template<class Body, class Allocator>
 void makeWebSocketSession(
     const std::string sessionIdentifier,
     boost::beast::tcp_stream stream,
-    std::shared_ptr<DRP::Service::Handler> &callbackHandler,
+    std::shared_ptr<MLReview::Service::Handler> &callbackHandler,
     boost::beast::http::request
     <
      Body,
@@ -546,7 +546,7 @@ template<class Body, class Allocator>
 void makeWebSocketSession(
     const std::string sessionIdentifier,
     boost::asio::ssl::stream<boost::beast::tcp_stream> stream,
-    std::shared_ptr<DRP::Service::Handler> &callbackHandler,
+    std::shared_ptr<MLReview::Service::Handler> &callbackHandler,
     boost::beast::http::request
     <
      Body,
@@ -570,7 +570,7 @@ class HTTPSession
 public:
     HTTPSession(boost::beast::flat_buffer buffer,
                 const std::shared_ptr<const std::string> &documentRoot,
-                std::shared_ptr<DRP::Service::Handler> &callbackHandler,
+                std::shared_ptr<MLReview::Service::Handler> &callbackHandler,
                 std::shared_ptr<UAuthenticator::IAuthenticator> &authenticator) :
         mBuffer(std::move(buffer)),
         mDocumentRoot(documentRoot),
@@ -861,7 +861,7 @@ private:
         return static_cast<Derived &> (*this);
     }
     std::shared_ptr<const std::string> mDocumentRoot;
-    std::shared_ptr<DRP::Service::Handler> mCallbackHandler{nullptr};
+    std::shared_ptr<MLReview::Service::Handler> mCallbackHandler{nullptr};
     std::shared_ptr<UAuthenticator::IAuthenticator> mAuthenticator{nullptr};
     std::queue<boost::beast::http::message_generator> mResponseQueue;
     boost::optional<boost::beast::http::request_parser<boost::beast::http::string_body>> mParser;
@@ -880,7 +880,7 @@ public:
         boost::beast::tcp_stream &&stream,
         boost::beast::flat_buffer &&buffer,
         const std::shared_ptr<const std::string> &documentRoot,
-        std::shared_ptr<DRP::Service::Handler> &callbackHandler,
+        std::shared_ptr<MLReview::Service::Handler> &callbackHandler,
         std::shared_ptr<UAuthenticator::IAuthenticator> &authenticator) :
         ::HTTPSession<::PlainHTTPSession>(
             std::move(buffer),
@@ -931,7 +931,7 @@ public:
         boost::asio::ssl::context &context,
         boost::beast::flat_buffer &&buffer,
         const std::shared_ptr<const std::string> &documentRoot,
-        std::shared_ptr<DRP::Service::Handler> &callbackHandler,
+        std::shared_ptr<MLReview::Service::Handler> &callbackHandler,
         std::shared_ptr<UAuthenticator::IAuthenticator> &authenticator) :
         ::HTTPSession<::SSLHTTPSession>(
             std::move(buffer),
@@ -1021,7 +1021,7 @@ public:
         boost::asio::ip::tcp::socket &&socket,
         boost::asio::ssl::context& sslContext,
         const std::shared_ptr<const std::string> &documentRoot,
-        std::shared_ptr<DRP::Service::Handler> &callbackHandler,
+        std::shared_ptr<MLReview::Service::Handler> &callbackHandler,
         std::shared_ptr<UAuthenticator::IAuthenticator> &authenticator) :
         mStream(std::move(socket)),
         mSSLContext(sslContext),
@@ -1101,7 +1101,7 @@ private:
     boost::asio::ssl::context& mSSLContext;
     std::shared_ptr<const std::string> mDocumentRoot;
     boost::beast::flat_buffer mBuffer;
-    std::shared_ptr<DRP::Service::Handler> mCallbackHandler{nullptr};
+    std::shared_ptr<MLReview::Service::Handler> mCallbackHandler{nullptr};
     std::shared_ptr<UAuthenticator::IAuthenticator> mAuthenticator{nullptr};
     std::chrono::seconds mStreamTimeOut{30};
 };

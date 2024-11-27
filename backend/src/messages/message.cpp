@@ -1,8 +1,8 @@
 #include <string>
 #include <nlohmann/json.hpp>
-#include "drp/messages/message.hpp"
+#include "mlReview/messages/message.hpp"
 
-using namespace DRP::Messages;
+using namespace MLReview::Messages;
 
 /// Destructor
 IMessage::~IMessage() = default;
@@ -31,8 +31,8 @@ std::optional<std::string> IMessage::getMessage() const noexcept
     return std::nullopt;
 }
 
-std::string DRP::Messages::toJSON(const std::unique_ptr<IMessage> &message,
-                                  const int indentIn)
+std::string MLReview::Messages::toJSON(const std::unique_ptr<IMessage> &message,
+                                       const int indentIn)
 {
     const int indent = indentIn >= 0 ? indentIn : -1;
     std::string result;

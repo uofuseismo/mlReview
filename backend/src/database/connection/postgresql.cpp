@@ -1,9 +1,9 @@
 #include <string>
 #include <soci/soci.h>
 #include <soci/postgresql/soci-postgresql.h>
-#include "drp/database/connection/postgresql.hpp"
+#include "mlReview/database/connection/postgresql.hpp"
 
-using namespace DRP::Database::Connection;
+using namespace MLReview::Database::Connection;
 
 class PostgreSQL::PostgreSQLImpl
 {

@@ -8,14 +8,14 @@
 #include <nlohmann/json.hpp>
 #include <bsoncxx/json.hpp>
 #include <mongocxx/client.hpp>
-#include "drp/service/catalog/resource.hpp"
-#include "drp/service/catalog/response.hpp"
-#include "drp/service/catalog/event.hpp"
-#include "drp/service/catalog/origin.hpp"
-#include "drp/service/catalog/arrival.hpp"
-#include "drp/database/connection/postgresql.hpp"
-#include "drp/database/connection/mongodb.hpp"
-#include "drp/messages/error.hpp"
+#include "mlReview/service/catalog/resource.hpp"
+#include "mlReview/service/catalog/response.hpp"
+#include "mlReview/service/catalog/event.hpp"
+#include "mlReview/service/catalog/origin.hpp"
+#include "mlReview/service/catalog/arrival.hpp"
+//#include "mlReview/database/connection/postgresql.hpp"
+#include "mlReview/database/connection/mongodb.hpp"
+#include "mlReview/messages/error.hpp"
 #ifdef WITH_SFF
 #include "sff/utilities/time.hpp"
 #include "sff/hypoinverse2000/eventSummary.hpp"
@@ -26,7 +26,7 @@
 #define RESOURCE_NAME "catalog"
 #define COLLECTION_NAME "events"
 
-using namespace DRP::Service::Catalog;
+using namespace MLReview::Service::Catalog;
 
 namespace
 {
@@ -148,7 +148,7 @@ nlohmann::json toObject(const std::vector<Event> &events)
 
 /// Get the last update
 std::chrono::seconds
-    getLastUpdate(DRP::Database::Connection::MongoDB &connection,
+    getLastUpdate(MLReview::Database::Connection::MongoDB &connection,
                   const std::chrono::seconds &lastUpdate,
                   const std::string &collectionName = COLLECTION_NAME)
 {
@@ -201,7 +201,7 @@ std::chrono::seconds
 
 /// Generates a catalog from the application database
 std::pair<std::chrono::seconds, std::vector<Event>>
-getEventsFromMongoDB(DRP::Database::Connection::MongoDB &connection,
+getEventsFromMongoDB(MLReview::Database::Connection::MongoDB &connection,
                      const std::chrono::seconds &startTime
                         = now() - std::chrono::seconds {86400*14},
                      const int maxEvents = 8192,
@@ -348,7 +348,7 @@ class Resource::ResourceImpl
 {
 public:
     ResourceImpl(
-        std::shared_ptr<DRP::Database::Connection::MongoDB> &mongoConnection) :
+        std::shared_ptr<MLReview::Database::Connection::MongoDB> &mongoConnection) :
         mMongoDBConnection(mongoConnection)
     {
 spdlog::warn("Need to make polling thread pop events over 2 weeks old");
@@ -433,10 +433,10 @@ spdlog::warn("Need to make polling thread pop events over 2 weeks old");
     mutable std::mutex mMutex;
     std::thread mQueryThread;
     std::atomic<bool> mKeepRunning{true};
-    std::shared_ptr<DRP::Database::Connection::MongoDB>
+    std::shared_ptr<MLReview::Database::Connection::MongoDB>
         mMongoDBConnection{nullptr};
-    std::shared_ptr<DRP::Database::Connection::PostgreSQL>
-        mAQMSConnection{nullptr};
+    //std::shared_ptr<MLReview::Database::Connection::PostgreSQL>
+    //    mAQMSConnection{nullptr};
     std::vector<Event> mEvents;
     nlohmann::json mEventsJSON;
     std::chrono::seconds mLastUpdate{0};
@@ -445,7 +445,7 @@ spdlog::warn("Need to make polling thread pop events over 2 weeks old");
 
 /// Constructor
 Resource::Resource(
-    std::shared_ptr<DRP::Database::Connection::MongoDB> &mongoConnection) :
+    std::shared_ptr<MLReview::Database::Connection::MongoDB> &mongoConnection) :
     pImpl(std::make_unique<ResourceImpl> (mongoConnection))
 {
     pImpl->start();
@@ -461,7 +461,7 @@ std::string Resource::getName() const noexcept
 }
 
 /// Process request
-std::unique_ptr<DRP::Messages::IMessage> 
+std::unique_ptr<MLReview::Messages::IMessage> 
 Resource::processRequest(const nlohmann::json &request)
 {
     // Figure out the query information
