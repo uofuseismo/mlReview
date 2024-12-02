@@ -3,9 +3,8 @@ import getEndPoint from '/src/utilities/getEndPoint';
 
 const apiEndPoint : string = getEndPoint();
 
-function fetchAsyncWaveformsFromAPI(identifier : string,
-                                    user : string,
-                                    password : string) {
+function fetchAsyncEventsFromAPI(user : string,
+                                 password : string) {
   const destination = apiEndPoint;
 
   const authorizationHeader = 'BASIC ' + base64_encode(`${user}:${password}`);
@@ -17,11 +16,11 @@ function fetchAsyncWaveformsFromAPI(identifier : string,
   };  
 
   const requestData = {
-    resource: 'waveforms',
-    identifier: Number(identifier)
+    resource: 'catalog'
   };
 
-  console.debug(`Querying waveforms from: ${destination}`);
+  console.debug(`Fetching events from ${destination}`);
+
   async function handleGetData() {
     const response
       = await fetch(destination, 
@@ -36,9 +35,8 @@ function fetchAsyncWaveformsFromAPI(identifier : string,
       const message = `An error has occurred: ${response.status}`;
       throw new Error(message);
     }
-    const waveformData = await response.json();
-console.log(waveformData);
-    return waveformData;
+    const eventData = await response.json();
+    return eventData;
   }
 
   try {
@@ -49,4 +47,4 @@ console.log(waveformData);
   }
 };
 
-export default fetchAsyncWaveformsFromAPI;
+export default fetchAsyncEventsFromAPI;

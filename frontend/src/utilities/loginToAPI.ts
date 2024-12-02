@@ -3,9 +3,8 @@ import getEndPoint from '/src/utilities/getEndPoint';
 
 const apiEndPoint : string = getEndPoint();
 
-function fetchAsyncWaveformsFromAPI(identifier : string,
-                                    user : string,
-                                    password : string) {
+function loginToAPI(user : string,
+                    password : string) {
   const destination = apiEndPoint;
 
   const authorizationHeader = 'BASIC ' + base64_encode(`${user}:${password}`);
@@ -16,13 +15,7 @@ function fetchAsyncWaveformsFromAPI(identifier : string,
     'Connection': 'close',
   };  
 
-  const requestData = {
-    resource: 'waveforms',
-    identifier: Number(identifier)
-  };
-
-  console.debug(`Querying waveforms from: ${destination}`);
-  async function handleGetData() {
+  async function handleLogin() {
     const response
       = await fetch(destination, 
                     {
@@ -30,23 +23,27 @@ function fetchAsyncWaveformsFromAPI(identifier : string,
                       headers: headers,
                       withCredentials: true,
                       crossorigin: true,
-                      body: JSON.stringify(requestData),
+                      body: null,
                     });
     if (!response.ok) {
       const message = `An error has occurred: ${response.status}`;
+      if (response.status === 403) {
+        console.error(`User ${user} forbidden`);
+        return null;
+      }
       throw new Error(message);
     }
-    const waveformData = await response.json();
-console.log(waveformData);
-    return waveformData;
+    const loginData = await response.json();
+    return loginData;
   }
 
   try {
-    return handleGetData();
+    return handleLogin();
   } catch (error) {
-    console.log(error);
+    console.error(`Login failed with ${error}; returning null`);
     return null;
   }
-};
 
-export default fetchAsyncWaveformsFromAPI;
+}
+
+export default loginToAPI;
