@@ -21,7 +21,7 @@
 #include "mlReview/messages/message.hpp"
 #include "mlReview/messages/error.hpp"
 #include "responses.hpp"
-
+#include "authorized.hpp"
 #include "base64.hpp"
 #include <boost/algorithm/string.hpp>
 
@@ -35,6 +35,7 @@ namespace
 template <class Body, class Allocator>
 boost::beast::http::message_generator
 handleRequest(
+    const std::string &jsonWebToken,
     boost::beast::string_view documentRoot,
     boost::beast::http::request
     <
@@ -164,6 +165,14 @@ handleRequest(
     try
     {
         std::string requestMessage = request.body();
+        // Could be a straight login
+        if (requestMessage.empty())
+        {
+            std::unique_ptr<MLReview::Messages::IMessage> responseMessage
+                 = std::make_unique<MLReview::Messages::Authorized> (jsonWebToken);
+            return successResponse(MLReview::Messages::toJSON(responseMessage));
+        }
+        // Otherwise process
         auto responseMessage = callbackHandler->process(requestMessage);
         if (responseMessage)
         {
@@ -633,6 +642,7 @@ public:
         bool authenticated{false};
         auto header = mParser->get().base();
  
+        std::string jsonWebToken;
         auto authorizationIndex = header.find("Authorization");
         if (authorizationIndex != header.end())
         {
@@ -682,6 +692,13 @@ public:
                                        ReturnCode::Allowed)
                                    {
                                        spdlog::info("Allowing " + userName);
+                                       auto credentials
+                                           = mAuthenticator->getCredentials(userName);
+                                       if (credentials)
+                                       {
+                                           auto jwt = credentials->getToken(); 
+                                           if (jwt){jsonWebToken = *jwt;}
+                                       }
                                    }
                                    else if (authenticationStatus ==
                                             UAuthenticator::IAuthenticator::
@@ -710,13 +727,9 @@ public:
                    else if (authorizationType == "BEARER")
                    {
                        authenticated = false;
-                       spdlog::critical("BEARER not yet done");
-                       return queueWrite(::createInternalServerErrorResponse(
-                                         "BEARER auth not yet implemented",
-                                          mParser->release()));
+                       jsonWebToken = authorizationField.at(1);
                        if (mAuthenticator)
                        {
-std::string jsonWebToken;
                            auto credentials = mAuthenticator->authorize(jsonWebToken);
                            if (credentials)
                            {
@@ -727,7 +740,7 @@ std::string jsonWebToken;
                                }
                                else
                                {
-                                   spdlog::info("Authorizing unknonw user");
+                                   spdlog::info("Authorizing unknown user");
                                }
                                authenticated = true;
                            }
@@ -780,7 +793,8 @@ std::string jsonWebToken;
             // Send the response
             if (authenticated)
             {
-                queueWrite(::handleRequest(*mDocumentRoot,
+                queueWrite(::handleRequest(jsonWebToken,
+                                           *mDocumentRoot,
                                            mParser->release(),
                                            mCallbackHandler));
             }
