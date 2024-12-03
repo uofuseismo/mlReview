@@ -528,6 +528,7 @@ Resource::processRequest(const nlohmann::json &request)
         {
             nlohmann::json result;
             result["hash"] = pImpl->getHash();
+            response->setMessage("Successful response to standard catalog hash request");
             response->setData(std::move(result));
         }
         else
