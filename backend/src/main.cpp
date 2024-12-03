@@ -46,7 +46,7 @@ struct ProgramOptions
 R"""(
 The mlReviewBackend is the API for the mlReview frontend.
 Example usage:
-    mlReviewBackend Associator --ini=mAssociator.ini
+    mlReviewBackend --address=127.0.0.1 --port=8080 --document_root=./ --n_threads=1
 Allowed options)""");
     desc.add_options()
         ("help",    "Produces this help message")
@@ -116,19 +116,6 @@ int main(int argc, char *argv[])
     }
     
     // Make an authenticator
-/*
-export LDAP_HOST=ldaps://alpha.seis.utah.edu
-export LDAP_PORT=636
-export LDAP_ORGANIZATION_UNIT="ou=Users"
-export LDAP_DOMAIN_COMPONENT="dc=seis,dc=utah,dc=edu"
-const std::string &serverAddress,
-         int port,
-         const std::string &organizationalUnitName,
-         const std::string &domainComponent,
-         const Version version,
-         const TLSVerifyClient tlsVerifyClient,
-         const std::string &issuer = "ldap"
-*/
 //std::cout << std::getenv("LDAP_HOST") << std::endl;
     std::shared_ptr<UAuthenticator::IAuthenticator> authenticator
         = std::make_shared<UAuthenticator::LDAP> (
