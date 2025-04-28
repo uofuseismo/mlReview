@@ -8,7 +8,7 @@ namespace MLReview::Service::Waveforms
 /// @class Response "response.hpp" "mlReview/service/waveforms/response.hpp"
 /// @brief Defines a response to a waveform request.
 /// @copyright Ben Baker (University of Utah) distributed under the MIT license.
-class Response : public MLReview::Messages::IMessage
+class Response final : public MLReview::Messages::IMessage
 {
 public:
     /// @brief Constructor.

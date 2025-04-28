@@ -23,7 +23,7 @@ xmlNode *findNode(xmlNode *node, const char *nodeName)
         {
             return node; 
         }
-        if (result = findNode(node->children, nodeName)){return result;}
+        if (result == findNode(node->children, nodeName)){return result;}
         node = node->next; 
     }
     return nullptr;

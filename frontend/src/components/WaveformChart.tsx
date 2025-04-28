@@ -21,6 +21,10 @@ const stateOptions: Highcharts.Options = {
     },
     panning: true,
     panKey: 'shift',
+    scrollablePlotArea: {
+      minHeight: 200,
+    }, 
+    marginRight: 20,
     //marginLeft: 50,
     //marginTop: 0,
   },
@@ -199,7 +203,7 @@ function computePlotOrder(waveformData, stationData, eventData) {
  }
 }
 
-function WaveformChart( {waveformData, stationData, eventData} ) {
+function WaveformChart( {waveformData, stationData, eventData, height} ) {
   //const chartComponentReference = React.useRef<Highcharts.React.RefObject> (null);
   //ref={chartComponentReference}
   computePlotOrder(waveformData, stationData, eventData);
@@ -314,13 +318,11 @@ function WaveformChart( {waveformData, stationData, eventData} ) {
 
   return (
     <React.Fragment>
-      <Center w='100%' h='100%' overflow='auto'>
         <HighchartsReact
-          containerProps={{ style: { width: "98%", height: plotHeight } }}
+          containerProps={{ style: { width: "100%", height: plotHeight } }}
           highcharts={Highcharts}
           options={chartOptions}
         />
-      </Center>
     </React.Fragment>
   )   
 }

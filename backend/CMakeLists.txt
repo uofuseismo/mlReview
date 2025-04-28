@@ -3,6 +3,7 @@ project(MLReviewBackend VERSION 0.1.0 LANGUAGES CXX)
 enable_testing()
 
 option(ENABLE_SSL "Enable SSL connections" OFF)
+option(WITH_CORS "Compile with CORS *" OFF)
 option(UUSS_SRC "Enable UUSS-specific source" ON)
 option(COMPILE_DATABASE_UTILITIES "Utilites for interacting with the datbase" OFF)
 #cmake -DBUILD_SHARED_LIBS=YES /path/to/source
@@ -15,7 +16,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake)
 
 set(THREADS_PREFER_PTHREAD_FLAG ON) 
-find_package(SOCI COMPONENTS postgresql sqlite3 REQUIRED)
+find_package(SOCI COMPONENTS Core PostgreSQL REQUIRED)
 find_package(mongocxx REQUIRED)
 find_package(bsoncxx REQUIRED)
 find_package(spdlog REQUIRED)
@@ -69,7 +70,7 @@ if (${DataLinkClient_FOUND})
 endif()
 add_library(mlReview ${LIBRARY_SRC})
 target_link_libraries(mlReview
-                      PRIVATE SOCI::soci_postgresql SOCI::soci_sqlite3
+                      PRIVATE SOCI::Core SOCI::PostgreSQL
                               mongo::mongocxx_shared mongo::bsoncxx_shared
                               GeographicLib::GeographicLib
                               nlohmann_json::nlohmann_json ${LIBXML2_LIBRARIES}
@@ -122,7 +123,7 @@ add_executable(mlReviewBackend
 
 target_link_libraries(mlReviewBackend
                       PRIVATE mlReview
-                              SOCI::soci_postgresql SOCI::soci_sqlite3
+                              SOCI::PostgreSQL
                               Boost::date_time
                               Boost::program_options
                               Boost::iostreams
@@ -165,7 +166,7 @@ if (${COMPILE_DATABASE_UTILITIES})
                  src/eventBuilder.cpp)
   target_link_libraries(eventBuilder
                         PRIVATE mlReview 
-                                SOCI::soci_postgresql
+                                SOCI::PostgreSQL SOCI::Core
                                 Boost::date_time
                                 Boost::program_options
                                 spdlog::spdlog
@@ -187,7 +188,7 @@ if (${COMPILE_DATABASE_UTILITIES})
                  src/createEvent.cpp)
   target_link_libraries(createEvent
                         PRIVATE mlReview
-                                SOCI::soci_postgresql
+                                SOCI::PostgreSQL SOCI::Core
                                 Boost::date_time
                                 Boost::program_options
                                 spdlog::spdlog

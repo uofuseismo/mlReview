@@ -279,7 +279,7 @@ public:
                         + std::to_string(identifier) + ".  Failed with: "
                         + std::string {e.what()});
             throw std::runtime_error("Failed to find waveforms for "
-                                   + identifier);
+                                   + std::to_string (identifier));
         }
 
         ::SavedWaveforms savedWaveforms{jsonWaveforms, now()};

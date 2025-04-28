@@ -2,26 +2,12 @@ import React from 'react'
 import reactLogo from './assets/react.svg'
 import viteLogo from '/vite.svg'
 import Login from '/src/components/Login';
-import ReviewPage from '/src/components/ReviewPage';
+//import ReviewPage from '/src/components/ReviewPage';
+import MainContainer from '/src/components/MainContainer';
 import loginToAPI from '/src/utilities/loginToAPI';
 import Box from '@chakra-ui/react';
+import { Access, UserCredentials } from '/src/utilities/userCredentials';
 import './App.css'
-
-{ /* Defines the user's access level */ }
-enum Access {
-  Denied,
-  ReadOnly,
-  ReadWrite
-};
-
-{ /* Defines the user's credentials */ }
-interface UserCredentials {
-  name: string;
-  password: string;
-  jsonWebToken: string; 
-  permissions: Access;
-  authenticated: boolean;
-};
 
 function App() {
   const [userCredentials, setUserCredentials] = React.useState<UserCredentials>({
@@ -80,9 +66,7 @@ function App() {
   if (userCredentials.authenticated) {
     return (
       <React.Fragment>
-        <ReviewPage
-          userCredentials={userCredentials}
-        />
+        <MainContainer userCredentials={userCredentials} />
       </React.Fragment>
     );
   }

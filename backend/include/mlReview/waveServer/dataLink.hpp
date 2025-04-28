@@ -7,7 +7,7 @@ namespace MLReview::WaveServer
 /// @class DataLink "dataLink.hpp" "mlReview/waveServer/dataLink.hpp"
 /// @brief This pulls data from a DataLink (ring)server.
 /// @copyright Ben Baker (University of Utah) distributed under the MIT license.
-class DataLink : public IClient
+class DataLink final : public IClient
 {
 public:
     DataLink() = delete;

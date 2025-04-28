@@ -8,7 +8,7 @@ namespace MLReview::WaveServer
 }
 namespace MLReview::WaveServer
 {
-class MultiClient : public IClient
+class MultiClient final : public IClient
 {
 public:
     MultiClient();

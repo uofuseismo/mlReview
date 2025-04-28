@@ -5,13 +5,13 @@ import { Button } from '/src/components/ui/button';
 import { Tooltip } from '/src/components/ui/tooltip';
 import EventsDrawer from '/src/components/EventsDrawer';
 
-function Header( {eventIdentifier, eventInformation, onSetSelectedEvent} ) {
+function Header( {eventIdentifier, eventInformation, onSetSelectedEvent, height} ) {
   console.debug(`Rendering header ${eventIdentifier}...`);
  const open = true;
  
   return (
     <React.Fragment>
-      <Flex color='white' w='100%' h='50px'>
+      <Flex color='white' w='100%' h={height}>
         <Center w='12%' bg='black' color='white'>
           <Heading fontSize='22px' color='white' align='left'>{eventIdentifier}</Heading>
         </Center>
