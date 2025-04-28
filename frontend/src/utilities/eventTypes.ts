@@ -7,7 +7,7 @@ export interface ArrivalInformation {
   channel3?: string, 
   locationCode : string,
   phase : string,
-  time : number,
+  time : Date,
   residual?: number,
 };
 
@@ -23,7 +23,7 @@ export interface OriginInformation {
 export interface EventInformation {
   identifier : string,
   origin : OriginInformation,
-  aqmsIdentifiers?: string[],
+  aqmsEventIdentifiers?: string[],
   reviewed : boolean,
 };
 
@@ -43,10 +43,10 @@ export function eventToEventInformation<EventInformation>(value : object) {
   if (Object.hasOwn(preferredOrigin, 'arrivals')) {
     arrivals = preferredOrigin.arrivals.map( function(element) { 
       var arrival : ArrivalInformation = {};
-      //var arrivalTime = new Date(0);
-      //const milliseconds = Math.floor((element.time - Math.floor(element.time))*1000.);
-      //arrivalTime.setUTCSeconds(Math.floor(Number(element.time))); 
-      //arrivalTime.setMilliseconds(milliseconds);
+      var arrivalTime = new Date(0);
+      const milliseconds = Math.floor((element.time - Math.floor(element.time))*1000.);
+      arrivalTime.setUTCSeconds(Math.floor(Number(element.time))); 
+      arrivalTime.setMilliseconds(milliseconds);
       arrival.network = String(element.network);
       arrival.station = String(element.station);
       arrival.channel1 = String(element.channel1);
@@ -63,7 +63,7 @@ export function eventToEventInformation<EventInformation>(value : object) {
       else {
         arrival.locationCode = '';
       }
-      arrival.time = Number(element.time); //arrivalTime; 
+      arrival.time = arrivalTime; //Number(element.time); //arrivalTime; 
       if (Object.hasOwn(element, 'residual')) {
         arrival.residual = Number(element.residual);
       }

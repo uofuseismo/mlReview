@@ -2,6 +2,7 @@ import React from 'react';
 import { Box, HStack } from '@chakra-ui/react';
 import { Table } from '@chakra-ui/react';
 import EventStationMap from '/src/components/EventStationMap';
+import strftimeUTC from '/src/utilities/strftimeUTC';
 
 function LocationReview( {event, stations, height} ) {
 
@@ -68,7 +69,7 @@ function LocationReview( {event, stations, height} ) {
     <React.Fragment>
       { /* <EventStationMap event={event} stations={stationsToPlot} height={mapHeight} width={mapWidth} /> */ }
       <HStack w='100%' h={height}>
-        <Box w='40%' h='100%' bg='white'>
+        <Box w='40%' h='98%' bg='white'>
           <Table.ScrollArea borderWidth="1px" maxW="xl" height='100%'>
             <Table.Root size="sm" variant="outline" striped>
               <Table.Header>
@@ -86,7 +87,7 @@ function LocationReview( {event, stations, height} ) {
                      <Table.Cell>{toName(item)}</Table.Cell>
                      <Table.Cell>{item.phase}</Table.Cell>
                      <Table.Cell>{item.residual.toFixed(3)}</Table.Cell>
-                     <Table.Cell>{toTime(item.time)}</Table.Cell>
+                     <Table.Cell>{strftimeUTC('%H:%M:%S.%fZ', item.time)}</Table.Cell>
                    </Table.Row>
                  ))
                }
@@ -94,7 +95,7 @@ function LocationReview( {event, stations, height} ) {
             </Table.Root>
           </Table.ScrollArea>
         </Box>
-        <Box w='60%' h='100%'>
+        <Box w='60%' h='98%'>
           <EventStationMap event={event} stations={stationsToPlot} height='100%' width='100%' />
         </Box>
       </HStack>
