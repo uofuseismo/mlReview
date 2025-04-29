@@ -161,7 +161,7 @@ handleRequest(
         return badRequest("Unknown HTTP-method");
     }   
 
-    // Attempt to response with the callback handler 
+    // Attempt to respond to request with the callback handler 
     try
     {
         std::string requestMessage = request.body();
@@ -766,9 +766,44 @@ public:
 
         if (boost::beast::websocket::is_upgrade(mParser->get()))
         {
+            spdlog::info("WS upgrade request");
+            // Smuggle the key in from the Sec-WebSocket-Protocol.
+            // Note, this is not a standard practice so the front end
+            // needs to know this hack.
+            auto authorizationIndex = header.find("Sec-WebSocket-Protocol");
+            if (authorizationIndex != header.end())
+            {
+                if (mAuthenticator)
+                {
+                    auto key = std::string {header["Sec-WebSocket-Protocol"]};
+                    if (!key.empty())
+                    {
+                        try
+                        {
+                            spdlog::info("Validating " + key);
+                            auto credentials = mAuthenticator->authorize(key);
+                            if (credentials)
+                            {
+                                auto user = credentials->getUser();
+                                if (user)
+                                {
+                                    spdlog::info("Upgrading "
+                                               + *user + " to a websocket");
+                                    authenticated = true;
+                               }
+                            }
+                        }
+                        catch (const std::exception &e)
+                        {
+                            spdlog::warn("Authorization failed because: "
+                                       + std::string {e.what()});
+                        }
+                    }
+                }
+            }
             if (authenticated)
             {
-                spdlog::debug(
+                spdlog::info(
                     "HTTPSesssion::onRead webSocket upgrade requested");
                 // Disable the timeout.
                 // The websocket::stream uses its own timeout settings.
@@ -784,8 +819,9 @@ public:
             }
             else
             {
-                queueWrite(::createForbiddenResponse("Invalid credentials",
-                                                     mParser->release()));
+                queueWrite(::createForbiddenResponse(
+                   "Websocket upgrade denied because of invalid credentials",
+                    mParser->release()));
             }
         }
         else

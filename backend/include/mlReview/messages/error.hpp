@@ -8,7 +8,7 @@ namespace MLReview::Messages
 /// @class Error "error.hpp" "mlReview/messages/error.hpp"
 /// @brief Defines a reusable error message to return to the client.
 /// @copyright Ben Baker (University of Utah) distributed under the MIT license.
-class Error : public IMessage
+class Error final : public IMessage
 {
 public:
     /// @brief Constructor.
@@ -27,7 +27,7 @@ public:
     /// @param[in] details  The details of the error message. 
     void setMessage(const std::string &details) noexcept;
     /// @result The details of the error message.
-    [[nodiscard]] std::optional<std::string> getMessage() const noexcept;
+    [[nodiscard]] std::optional<std::string> getMessage() const noexcept final;
 
     /// @result Flag indicating the request was successful.
     [[nodiscard]] bool getSuccess() const noexcept override final;
