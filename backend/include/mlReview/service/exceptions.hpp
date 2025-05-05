@@ -5,7 +5,7 @@ namespace MLReview::Service
 {
 /// @brief This should result in a 403 FORBIDDEN error.
 /// @copyright Ben Baker (UUSS) distributed under the MIT license.
-class InvalidPermissionException : public std::exception 
+class InvalidPermissionException final : public std::exception 
 {
 public:
     InvalidPermissionException(const std::string &message) :
