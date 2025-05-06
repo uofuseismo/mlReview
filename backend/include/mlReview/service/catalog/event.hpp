@@ -1,6 +1,7 @@
 #ifndef MLREVIEW_SERVICE_CATALOG_EVENT_HPP
 #define MLREVIEW_SERVICE_CATALOG_EVENT_HPP
 #include <memory>
+#include <vector>
 #include <optional>
 #include <string>
 #include <nlohmann/json.hpp>

@@ -146,7 +146,14 @@ Handler::process(const std::string &request) const
             return resource->second->processRequest(object);
         }
     }
-    catch (const std::exception &e)
+    catch (const std::runtime_error &e)
+    {
+        auto response = std::make_unique <MLReview::Messages::Error> ();
+        response->setStatusCode(500);
+        response->setMessage("Internal server error");
+        return response;
+    }
+    catch (const std::invalid_argument &e)
     {
         auto response = std::make_unique <MLReview::Messages::Error> (); 
         response->setStatusCode(400);

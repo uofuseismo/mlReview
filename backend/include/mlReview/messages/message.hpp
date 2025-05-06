@@ -18,7 +18,7 @@ public:
     [[nodiscard]] virtual std::optional<nlohmann::json> getData() const noexcept; 
     /// @result The status code associated with this request.
     [[nodiscard]] virtual int getStatusCode() const noexcept;
-    /// @result True indicates teh API call was a success.
+    /// @result True indicates the API call was a success.
     [[nodiscard]] virtual bool getSuccess() const noexcept;
     /// @result True a message accompanying the response.
     ///         By defualt this is null.

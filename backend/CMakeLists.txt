@@ -123,6 +123,7 @@ add_executable(mlReviewBackend
 #               src/permissions.cpp)
 
 target_link_libraries(mlReviewBackend
+                      PUBLIC nlohmann_json::nlohmann_json
                       PRIVATE mlReview
                               SOCI::PostgreSQL
                               Boost::date_time
@@ -132,7 +133,6 @@ target_link_libraries(mlReviewBackend
                               spdlog::spdlog
                               GeographicLib::GeographicLib
                               mongo::mongocxx_shared mongo::bsoncxx_shared
-                              nlohmann_json::nlohmann_json
                               #jwt-cpp::jwt-cpp
                               ${uAuthenticator_LIBRARY}
                               ${CURL_LIBRARIES} ${LDAP_LIBRARY} ${LBER_LIBRARY} ${MINISEED_LIBRARY} ${SFF_LIBRARY})
@@ -171,6 +171,7 @@ if (${COMPILE_DATABASE_UTILITIES})
                                 Boost::date_time
                                 Boost::program_options
                                 spdlog::spdlog
+                                nlohmann_json::nlohmann_json
                                 mongo::mongocxx_shared mongo::bsoncxx_shared)
   target_include_directories(eventBuilder
                              PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src
@@ -193,6 +194,7 @@ if (${COMPILE_DATABASE_UTILITIES})
                                 Boost::date_time
                                 Boost::program_options
                                 spdlog::spdlog
+                                nlohmann_json::nlohmann_json
                                 mongo::mongocxx_shared mongo::bsoncxx_shared)
   target_include_directories(createEvent
                              PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src

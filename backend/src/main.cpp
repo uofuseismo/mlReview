@@ -11,6 +11,7 @@
 #include "mlReview/database/connection/postgresql.hpp"
 #include "mlReview/database/connection/mongodb.hpp"
 #include "mlReview/service/handler.hpp"
+#include "mlReview/service/actions/acceptEventToAWS.hpp"
 #include "mlReview/service/catalog/resource.hpp"
 #include "mlReview/service/stations/resource.hpp"
 #include "mlReview/service/waveforms/resource.hpp"
@@ -154,6 +155,9 @@ int main(int argc, char *argv[])
 
     //getWaveform(*mlDatabaseConnection);
 
+    auto acceptEventToAWS
+        = std::make_unique<MLReview::Service::Actions::AcceptEventToAWS>
+          (mongoDatabaseConnection);
     auto catalogResource
         = std::make_unique<MLReview::Service::Catalog::Resource>
           (mongoDatabaseConnection);
@@ -168,6 +172,7 @@ int main(int argc, char *argv[])
     handler->insert(std::move(catalogResource));
     handler->insert(std::move(stationsResource));
     handler->insert(std::move(waveformsResource));
+    handler->insert(std::move(acceptEventToAWS));
 
     //const auto address = boost::asio::ip::make_address("127.0.0.1");
     //const auto port = static_cast<unsigned short> (8090);
@@ -186,7 +191,8 @@ int main(int argc, char *argv[])
     std::make_shared<MLReview::WebServer::Listener> (
         ioContext,
         context,
-        boost::asio::ip::tcp::endpoint{programOptions.address, programOptions.port},
+        boost::asio::ip::tcp::endpoint{programOptions.address,
+                                       programOptions.port},
         documentRoot,
         handler,
         authenticator)->run();

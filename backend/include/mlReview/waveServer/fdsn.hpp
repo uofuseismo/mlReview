@@ -8,13 +8,13 @@ namespace MLReview::WaveServer
 /// @brief Requests waveforms from a Federation of Digital Seismograph
 ///        Network-esque API.
 /// @copyright Ben Baker (University of Utah) distributed under the MIT license.
-class FDSN : public IClient
+class FDSN final : public IClient
 {
 public:
     FDSN(); 
     explicit FDSN(const std::string &url);
 
-    [[nodiscard]] Waveform getData(const Request &request) const;
+    [[nodiscard]] Waveform getData(const Request &request) const final;
     /// @result The client type which is FDSN.
     [[nodiscard]] std::string getType() const noexcept final;
     /// @brief Destrutor.

@@ -8,7 +8,7 @@ namespace MLReview::Messages
 /// @class Authorized "authorized.hpp" "mlReview/messages/authorized.hpp"
 /// @brief A one-off authorized response message when not using the websocket but simple HTTP.
 /// @copyright Ben Baker (University of Utah) distributed under the MIT license.
-class Authorized : public IMessage
+class Authorized final : public IMessage
 {
 public:
     /// @brief Constructor.
@@ -35,7 +35,7 @@ public:
         mData["jsonWebToken"] = jwt; 
     }
     /// @result The details of the error message.
-    [[nodiscard]] std::optional<std::string> getMessage() const noexcept
+    [[nodiscard]] std::optional<std::string> getMessage() const noexcept final
     {
         return "Successfully logged into mlReview API";
     }

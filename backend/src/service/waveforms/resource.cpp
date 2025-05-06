@@ -226,6 +226,10 @@ public:
         std::shared_ptr<MLReview::Database::Connection::MongoDB> &mongoConnection) :
         mMongoDBConnection(mongoConnection)
     {
+        if (mMongoDBConnection == nullptr)
+        {
+            throw std::invalid_argument("MongoDB connection is NULL");
+        }
         //getWaveforms(*mMongoDBConnection, 11861);
         //mEvents = getEvents(*mMongoDBConnection);
         //mEventsJSON = ::toObject(mEvents);
