@@ -253,7 +253,6 @@ std::pair<bool, nlohmann::json>
            arrival["uncertainty"] = nullptr;
            arrival["algorithm"] = "unet-detection,cnn-refinement";
            arrival["isAutomatic"] = true;
- std::cout << arrival << std::endl;
            arrivals.push_back(arrival);
        }
        else
@@ -281,7 +280,6 @@ std::pair<bool, nlohmann::json>
        throw std::runtime_error("Unhandled monitoring region "
                               + monitoringRegion);
    }
-std::cout << result.dump(4) << std::endl;
    return std::pair{isYellowstone, result};
 }
 
@@ -403,13 +401,12 @@ public:
             {
                 url = mAPIURL + "Utah";
             }
-spdlog::info(url);
+            spdlog::debug("Endpoint is " + url);
             curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
             struct curl_slist *headerList{nullptr};
             if (!mAPIAccessKey.empty())
             {
                 auto xAPIKeyHeader = "x-api-key:" + mAPIAccessKey;
-spdlog::info(xAPIKeyHeader);
                 headerList = curl_slist_append(headerList, xAPIKeyHeader.c_str());
             }
             headerList = curl_slist_append(headerList, "Accept: application/json");
@@ -417,7 +414,7 @@ spdlog::info(xAPIKeyHeader);
             curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headerList);
             curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "PUT");
             auto stringResult = data.dump(-1);
-            curl_easy_setopt(curl, CURLOPT_POSTFIELDS, stringResult.c_str()); //"{\"identifier\": \"uu\"}"); 
+            curl_easy_setopt(curl, CURLOPT_POSTFIELDS, stringResult.c_str());
             //curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, -1L);
             curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
             //curl_easy_setopt(curl, CURLOPT_POSTFIELDS, ="name=danial&project=curl");
