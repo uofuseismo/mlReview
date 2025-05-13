@@ -26,10 +26,11 @@ namespace
 }
 
 [[nodiscard]]
-nlohmann::json sendPutJSONRequest(const std::string &uri,
-                                  const std::string &apiKey,
-                                  const nlohmann::json &data,
-                                  const bool verbose = false)
+nlohmann::json sendPutDeleteJSONRequest(const std::string &uri,
+                                        const std::string &apiKey,
+                                        const nlohmann::json &data,
+                                        const std::string &method,
+                                        const bool verbose)
 {
     nlohmann::json jsonResponse;
     std::string errorMessage;
@@ -83,13 +84,34 @@ nlohmann::json sendPutJSONRequest(const std::string &uri,
             throw std::runtime_error("Failed to set CURL request header");
         }        
         // Setup the PUT request
-        returnCode = curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "PUT");
-        if (returnCode != CURLE_OK)
+        if (method == "PUT")
+        {
+            returnCode = curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "PUT");
+            if (returnCode != CURLE_OK)
+            {
+                curl_slist_free_all(headerList);
+                curl_easy_cleanup(curl);
+                curl_global_cleanup();
+                throw std::runtime_error("Failed to specify PUT request");
+            }
+        }
+        else if (method == "DELETE")
+        {
+            returnCode = curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "DELETE");
+            if (returnCode != CURLE_OK)
+            {   
+                curl_slist_free_all(headerList);
+                curl_easy_cleanup(curl);
+                curl_global_cleanup();
+                throw std::runtime_error("Failed to specify DELETE request");
+            }   
+        }
+        else
         {
             curl_slist_free_all(headerList);
             curl_easy_cleanup(curl);
             curl_global_cleanup();
-            throw std::runtime_error("Failed to specify PUT request");
+            throw std::runtime_error("Unhandled request: " + method);
         }
         auto dataForAPI = data.dump(-1);
         //spdlog::debug(dataForAPI);
@@ -156,6 +178,25 @@ nlohmann::json sendPutJSONRequest(const std::string &uri,
     }
     return jsonResponse;
 }
+
+[[nodiscard]]
+nlohmann::json sendPutJSONRequest(const std::string &uri,
+                                  const std::string &apiKey,
+                                  const nlohmann::json &data,
+                                  const bool verbose = false)
+{
+    return sendPutDeleteJSONRequest(uri, apiKey, data, "PUT", verbose);
+}
+
+[[nodiscard]]                           
+nlohmann::json sendDeleteJSONRequest(const std::string &uri,
+                                     const std::string &apiKey,
+                                     const nlohmann::json &data,
+                                     const bool verbose = false)
+{   
+    return sendPutDeleteJSONRequest(uri, apiKey, data, "DELETE", verbose);
+}   
+
 
 }
 #endif

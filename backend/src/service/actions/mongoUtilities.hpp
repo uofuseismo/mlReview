@@ -3,6 +3,9 @@
 #include <string>
 #include <bsoncxx/json.hpp>
 #include <mongocxx/client.hpp>
+#include "mlReview/database/connection/mongodb.hpp"
+
+#define COLLECTION_NAME "events"
 
 namespace
 {
@@ -79,6 +82,7 @@ void updateEventSubmittedInMongoDB(
             updateOptions.upsert(false);
             nlohmann::json object;
             object["submittedToCloudCatalog"] = submitted;
+            object["reviewStatus"] = "human";
             bsoncxx::document::value bsonObject
                 = bsoncxx::from_json(object.dump());
             auto updateDocument
@@ -100,6 +104,59 @@ void updateEventSubmittedInMongoDB(
     {
         throw std::runtime_error("Database connection is null");
     }   
+}
+
+[[nodiscard]]
+nlohmann::json getParametricData(
+    MLReview::Database::Connection::MongoDB &connection,
+    const int64_t mongoIdentifier,
+    const std::string &collectionName)
+{
+    nlohmann::json jsonObject;
+    auto databaseName = connection.getDatabaseName();
+    using namespace bsoncxx::builder::basic;
+    auto client
+        = reinterpret_cast<mongocxx::client *> (connection.getSession());
+    auto database = client->database(databaseName);
+    if (database)
+    {   
+        auto collection = database.collection(collectionName);
+        if (collection)
+        {
+            mongocxx::options::find searchOptions{};
+            searchOptions.projection(
+                make_document(//kvp("parametricData", 1),
+                              kvp("waveformData", 0), // Don't get waveforms
+                              kvp("_id", 0)) 
+            );
+            auto filterKey
+                = bsoncxx::document::view_or_value(
+                     make_document(kvp("eventIdentifier", mongoIdentifier)));
+            auto foundDocument = collection.find_one(filterKey, searchOptions);
+            if (foundDocument)
+            {   
+                auto json
+                   = bsoncxx::to_json(*foundDocument,
+                                      bsoncxx::ExtendedJsonMode::k_relaxed);
+                jsonObject = nlohmann::json::parse(json);
+            }   
+            else
+            {   
+                throw std::runtime_error("Could not find event "
+                                       + std::to_string(mongoIdentifier));
+            }   
+        }
+        else
+        {
+            throw std::runtime_error("Collection " 
+                                   + collectionName + " does not exist");
+        }
+    }   
+    else
+    {   
+        throw std::runtime_error("Database connection is null");
+    }   
+    return jsonObject;
 }
 
 }

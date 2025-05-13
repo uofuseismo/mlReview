@@ -6,7 +6,6 @@
 #include <bsoncxx/json.hpp>
 #include <mongocxx/client.hpp>
 #include "mlReview/service/actions/acceptEventToAWS.hpp"
-#include "mlReview/database/connection/mongodb.hpp"
 #include "mlReview/messages/message.hpp"
 #include "mlReview/messages/error.hpp"
 #include "curl.hpp"
@@ -42,42 +41,6 @@ public:
 };
 
 /*
-/// Generates a catalog from the application database
-bool checkIfEventExists(
-    MLReview::Database::Connection::MongoDB &connection,
-    const int64_t identifier,
-    const std::string &collectionName)
-{
-    auto databaseName = connection.getDatabaseName();
-    using namespace bsoncxx::builder::basic;
-    auto client
-        = reinterpret_cast<mongocxx::client *> (connection.getSession());
-    auto database = client->database(databaseName);
-    if (database)
-    {
-        auto collection = database.collection(collectionName);
-        if (collection)
-        {
-            mongocxx::options::find searchOptions{};
-            searchOptions.projection(
-                make_document(kvp("parametricData", 0), 
-                              kvp("_id", 0)) 
-            );
-            auto filterKey
-                = bsoncxx::document::view_or_value(
-                     make_document(kvp("eventIdentifier", identifier)));
-            auto foundDocument = collection.find_one(filterKey, searchOptions);
-            return foundDocument ? true : false;
-        }
-    }
-    else
-    {
-        throw std::runtime_error("Database connection is null");
-    }
-    return false;
-}
-*/
-
 [[nodiscard]]
 nlohmann::json getParametricData(
     MLReview::Database::Connection::MongoDB &connection,
@@ -97,7 +60,8 @@ nlohmann::json getParametricData(
         {   
             mongocxx::options::find searchOptions{};
             searchOptions.projection(
-                make_document(kvp("waveformData", 0), 
+                make_document(//kvp("parametricData", 1),
+                              kvp("waveformData", 0), // Don't get waveforms
                               kvp("_id", 0)) 
             );  
             auto filterKey
@@ -129,12 +93,13 @@ nlohmann::json getParametricData(
     }
     return jsonObject;
 }
+*/
 
 [[nodiscard]]
 std::pair<bool, nlohmann::json>
-   initialResponseToAPI(const nlohmann::json &initialResponse,
-                        const std::string &authorityIn = "UU",
-                        const bool isHumanReviewed = true)
+   createCreateUpdateRequest(const nlohmann::json &initialResponse,
+                             const std::string &authorityIn = "UU",
+                             const bool isHumanReviewed = true)
 {
    auto authority = authorityIn;
    std::transform(authority.begin(), authority.end(), authority.begin(),
@@ -286,67 +251,6 @@ std::pair<bool, nlohmann::json>
    return std::pair{isYellowstone, result};
 }
 
-/*
-/// Let MongoDB know the event was submitted to AWS
-void updateEventSubmittedInMongoDB(
-    MLReview::Database::Connection::MongoDB &connection,
-    const int64_t mongoIdentifier,
-    const std::string &collectionName,
-    const bool submitted)
-{
-    auto databaseName = connection.getDatabaseName();
-    using namespace bsoncxx::builder::basic;
-    auto client
-        = reinterpret_cast<mongocxx::client *> (connection.getSession());
-    auto database = client->database(databaseName);
-    if (database)
-    {   
-        auto collection = database.collection(collectionName);
-        if (collection)
-        {
-            mongocxx::options::find searchOptions{};
-            searchOptions.projection(
-                make_document(kvp("waveformDataData", 0),
-                              kvp("_id", 0))
-            );
-            auto filterKey
-                = bsoncxx::document::view_or_value(
-                     make_document(kvp("eventIdentifier", mongoIdentifier)));
-            auto foundDocument = collection.find_one(filterKey, searchOptions);
-            if (!foundDocument)
-            {
-                throw std::runtime_error("Could not find event "
-                                       + std::to_string(mongoIdentifier));
-            }
-            // Update
-            mongocxx::options::update updateOptions;
-            updateOptions.upsert(false);
-            nlohmann::json object;
-            object["submittedToCloudCatalog"] = submitted;
-            bsoncxx::document::value bsonObject
-                = bsoncxx::from_json(object.dump());
-            auto updateDocument
-                = make_document(kvp("$set", bsonObject));
-            auto updateResult
-                = collection.update_one(filterKey.view(),
-                                        updateDocument.view(),
-                                        updateOptions);
-            spdlog::info("Updated "
-                       + std::to_string(mongoIdentifier));
-        }
-        else
-        {
-            throw std::runtime_error("Collection "
-                                   + collectionName + " does not exist");
-        }
-    }
-    else
-    {
-        throw std::runtime_error("Database connection is null");
-    }
-}
-*/
-
 }
 
 
@@ -439,10 +343,17 @@ AcceptEventToAWS::processRequest(const nlohmann::json &request)
     if (!request.contains("identifier"))
     {   
         throw std::invalid_argument("Event identifier not set");
-    }   
-    mongoIdentifier = request["identifier"].template get<int64_t> (); 
+    }
+    try
+    {
+        mongoIdentifier = request["identifier"].template get<int64_t> (); 
+    }
+    catch (...)
+    {
+        throw std::invalid_argument("identifier must be an int");
+    }
     // Does the event exist?
-    const std::string collectionName{"events"};
+    const std::string collectionName{COLLECTION_NAME};
     auto eventExists = ::checkIfEventExists(*pImpl->mMongoDBConnection,
                                             mongoIdentifier,
                                             collectionName);
@@ -454,9 +365,9 @@ AcceptEventToAWS::processRequest(const nlohmann::json &request)
         std::string authority{"UU"};
         constexpr bool isHumanReviewed{true};
         auto [isYellowstone, jsonForAPI]
-             = ::initialResponseToAPI(initialJSON,
-                                      authority,
-                                      isHumanReviewed);
+             = ::createCreateUpdateRequest(initialJSON,
+                                           authority,
+                                           isHumanReviewed);
         // Send it
         try
         {
@@ -519,12 +430,21 @@ AcceptEventToAWS::processRequest(const nlohmann::json &request)
                                                     mongoIdentifier,
                                                     collectionName,
                                                     submitted);
+                    spdlog::info("Successfully set "
+                               + std::to_string (mongoIdentifier)
+                               + " to accepted in MongoDB collection "
+                               + collectionName);
+                                 
                 }
                 catch (const std::exception &e)
                 {
                     spdlog::warn("Failed to update MongoDB; failed with: "
                                + std::string {e.what()});
                 }
+            }
+            else
+            {
+                spdlog::warn("AWS API responded without statusCode field");
             }
         }
         catch (const std::exception &e)
@@ -547,7 +467,7 @@ AcceptEventToAWS::processRequest(const nlohmann::json &request)
     }
     auto responseMessage = "Successfully propagated "
                          + std::to_string(mongoIdentifier)
-                         + " to AWS";
+                         + " to AWS and added to MongoDB";
     auto response = std::make_unique<::Response> (responseMessage); 
     return response;
 }

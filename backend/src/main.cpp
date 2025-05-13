@@ -12,6 +12,7 @@
 #include "mlReview/database/connection/mongodb.hpp"
 #include "mlReview/service/handler.hpp"
 #include "mlReview/service/actions/acceptEventToAWS.hpp"
+#include "mlReview/service/actions/deleteEventFromAWS.hpp"
 #include "mlReview/service/catalog/resource.hpp"
 #include "mlReview/service/stations/resource.hpp"
 #include "mlReview/service/waveforms/resource.hpp"
@@ -158,6 +159,9 @@ int main(int argc, char *argv[])
     auto acceptEventToAWS
         = std::make_unique<MLReview::Service::Actions::AcceptEventToAWS>
           (mongoDatabaseConnection);
+    auto deleteEventFromAWS
+        = std::make_unique<MLReview::Service::Actions::DeleteEventFromAWS>
+          (mongoDatabaseConnection);
     auto catalogResource
         = std::make_unique<MLReview::Service::Catalog::Resource>
           (mongoDatabaseConnection);
@@ -173,6 +177,7 @@ int main(int argc, char *argv[])
     handler->insert(std::move(stationsResource));
     handler->insert(std::move(waveformsResource));
     handler->insert(std::move(acceptEventToAWS));
+    handler->insert(std::move(deleteEventFromAWS));
 
     //const auto address = boost::asio::ip::make_address("127.0.0.1");
     //const auto port = static_cast<unsigned short> (8090);
