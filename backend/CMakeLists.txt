@@ -102,6 +102,7 @@ add_executable(mlReviewBackend
                src/service/handler.cpp
                src/service/resource.cpp
                src/service/actions/acceptEventToAWS.cpp
+               src/service/actions/deleteEventFromAWS.cpp
                src/service/catalog/resource.cpp
                src/service/catalog/response.cpp
                src/service/stations/resource.cpp
