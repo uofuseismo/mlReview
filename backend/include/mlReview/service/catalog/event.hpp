@@ -67,6 +67,12 @@ public:
     void toggleReviewed(bool reviewed) noexcept;
     /// @result True indicates the event has been reviewed.
     [[nodiscard]] std::optional<bool> wasReviewed() const noexcept;
+
+    /// @brief Toggles the status of being submitted to the cloud.
+    /// @param[in] submitted  If true then the event was submitted to the cloud.
+    void toggleSubmittedToCloudCatalog(bool submitted) noexcept;
+    /// @result True indicates the event was submitted to the cloud catalog.
+    [[nodiscard]] std::optional<bool> wasSubmittedToCloudCatalog() const noexcept;
     /// @}
 
 

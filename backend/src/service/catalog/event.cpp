@@ -19,6 +19,8 @@ public:
     bool mHaveAQMSIdentifier{false};
     bool mHavePreferredOrigin{false};
     bool mHaveReviewStatus{false};
+    bool mSubmittedToCloudCatalog{false};
+    bool mHaveSubmittedToCloudCatalogStatus{false};
 };
 
 /// Event
@@ -55,6 +57,12 @@ Event::Event(const nlohmann::json &jsonObject) :
         {
             event.setAQMSEventIdentifiers(aqmsEventIdentifiers);
         }
+    }
+    if (jsonObject.contains("submittedToCloudCatalog"))
+    {
+        auto submittedToCloudCatalog
+            = jsonObject["submittedToCloudCatalog"].template get<bool> ();
+        event.toggleSubmittedToCloudCatalog(submittedToCloudCatalog);
     }
 
     Origin origin;
@@ -209,6 +217,19 @@ bool Event::havePreferredOrigin() const noexcept
     return pImpl->mHavePreferredOrigin;
 }
 
+/// Submitted to cloud catalog?
+void Event::toggleSubmittedToCloudCatalog(const bool submitted) noexcept
+{
+    pImpl->mSubmittedToCloudCatalog = submitted;
+    pImpl->mHaveSubmittedToCloudCatalogStatus = true;
+}
+
+std::optional<bool> Event::wasSubmittedToCloudCatalog() const noexcept
+{
+    return pImpl->mHaveSubmittedToCloudCatalogStatus ?
+           std::optional<bool> (pImpl->mSubmittedToCloudCatalog) : std::nullopt;
+}
+
 /// Reviewed?
 void Event::toggleReviewed(const bool reviewed) noexcept
 { 
@@ -260,6 +281,11 @@ nlohmann::json MLReview::Service::Catalog::toObject(const Event &event)
         {
             result["aqmsEventIdentifiers"] = *aqmsEventIdentifiers;
         }
+    }
+    auto submittedToCloudCatalog = event.wasSubmittedToCloudCatalog();
+    if (submittedToCloudCatalog)
+    {
+        result["submittedToCloudCatalog"] = *submittedToCloudCatalog;
     }
     return result;
 }

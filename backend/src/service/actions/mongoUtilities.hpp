@@ -1,6 +1,7 @@
 #ifndef MONGO_UTILITIES_HPP
 #define MONGO_UTILITIES_HPP
 #include <string>
+#include <chrono>
 #include <bsoncxx/json.hpp>
 #include <mongocxx/client.hpp>
 #include "mlReview/database/connection/mongodb.hpp"
@@ -9,6 +10,13 @@
 
 namespace
 {
+
+std::chrono::seconds now()
+{
+    auto now = std::chrono::high_resolution_clock::now();
+    return std::chrono::duration_cast<std::chrono::seconds> (now.time_since_epoch());
+}
+
 
 /// @result True indicates the event with the given identifier exists in
 ///         the MongoDB (webapp) database.
@@ -83,6 +91,7 @@ void updateEventSubmittedInMongoDB(
             nlohmann::json object;
             object["submittedToCloudCatalog"] = submitted;
             object["reviewStatus"] = "human";
+            object["lastUpdate"] = static_cast<int64_t> (::now().count());
             bsoncxx::document::value bsonObject
                 = bsoncxx::from_json(object.dump());
             auto updateDocument
