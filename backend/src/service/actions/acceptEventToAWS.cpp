@@ -2,7 +2,6 @@
 #include <sstream>
 #include <vector>
 #include <spdlog/spdlog.h>
-#include <curl/curl.h>
 #include <nlohmann/json.hpp>
 #include <bsoncxx/json.hpp>
 #include <mongocxx/client.hpp>
@@ -10,8 +9,10 @@
 #include "mlReview/database/connection/mongodb.hpp"
 #include "mlReview/messages/message.hpp"
 #include "mlReview/messages/error.hpp"
+#include "curl.hpp"
+#include "mongoUtilities.hpp"
 
-#define RESOURCE_NAME "actions/acceptToAWS"
+#define RESOURCE_NAME "actions/acceptEventToAWS"
 
 using namespace MLReview::Service::Actions;
 
@@ -40,6 +41,7 @@ public:
     std::string mMessage;
 };
 
+/*
 /// Generates a catalog from the application database
 bool checkIfEventExists(
     MLReview::Database::Connection::MongoDB &connection,
@@ -74,6 +76,7 @@ bool checkIfEventExists(
     }
     return false;
 }
+*/
 
 [[nodiscard]]
 nlohmann::json getParametricData(
@@ -283,11 +286,13 @@ std::pair<bool, nlohmann::json>
    return std::pair{isYellowstone, result};
 }
 
+/*
 /// Let MongoDB know the event was submitted to AWS
-void updateMongoDB(
+void updateEventSubmittedInMongoDB(
     MLReview::Database::Connection::MongoDB &connection,
     const int64_t mongoIdentifier,
-    const std::string &collectionName)
+    const std::string &collectionName,
+    const bool submitted)
 {
     auto databaseName = connection.getDatabaseName();
     using namespace bsoncxx::builder::basic;
@@ -317,7 +322,7 @@ void updateMongoDB(
             mongocxx::options::update updateOptions;
             updateOptions.upsert(false);
             nlohmann::json object;
-            object["submittedToCloudCatalog"] = true;
+            object["submittedToCloudCatalog"] = submitted;
             bsoncxx::document::value bsonObject
                 = bsoncxx::from_json(object.dump());
             auto updateDocument
@@ -340,19 +345,7 @@ void updateMongoDB(
         throw std::runtime_error("Database connection is null");
     }
 }
-
-/// Callback function that writes data to std::ostream
-[[nodiscard]] size_t writeCURLData(void *buf, const size_t size,
-                                   const size_t nmemb, void *userp)
-{
-    if (userp)
-    {   
-        std::ostream &os = *static_cast<std::ostream *>(userp);
-        auto len = static_cast<std::streamsize> (size*nmemb);
-        if (os.write(static_cast<char *> (buf), len)){return len;}
-    }   
-    return 0;
-}
+*/
 
 }
 
@@ -401,99 +394,18 @@ public:
     [[nodiscard]]
     nlohmann::json sendRequest(const nlohmann::json &data, bool isYellowstone) const
     {
-        nlohmann::json jsonResponse;
-        std::string errorMessage;
-        CURL *curl{nullptr};
-        curl_global_init(CURL_GLOBAL_ALL);
-        curl = curl_easy_init();
-        if (curl)
+        std::string uri;
+        if (isYellowstone)
         {
-            std::string url;
-            if (isYellowstone)
-            {
-                url = mAPIURL + "Yellowstone";
-            }
-            else
-            {
-                url = mAPIURL + "Utah";
-            }
-            spdlog::debug("Endpoint is " + url);
-            auto returnCode = curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
-            struct curl_slist *headerList{nullptr};
-            if (!mAPIAccessKey.empty())
-            {
-                auto xAPIKeyHeader = "x-api-key:" + mAPIAccessKey;
-                headerList = curl_slist_append(headerList, xAPIKeyHeader.c_str());
-            }
-            returnCode = curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &writeCURLData);
-            if (returnCode != CURLE_OK)
-            {
-                throw std::runtime_error("Failed to set CURL data catcher");
-            }
-            std::ostringstream outputStream;
-            returnCode = curl_easy_setopt(curl, CURLOPT_FILE, &outputStream);
-            if (returnCode != CURLE_OK)
-            {
-                throw std::runtime_error("Failed to set output stream handle");
-            }
-
-            headerList = curl_slist_append(headerList, "Accept: application/json");
-            headerList = curl_slist_append(headerList, "Content-Type: application/json");
-            returnCode = curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headerList);
-            if (returnCode != CURLE_OK)
-            {
-                throw std::runtime_error("Failed to set header info");
-            }
-            returnCode = curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "PUT");
-            if (returnCode != CURLE_OK)
-            {
-                throw std::runtime_error("Failed to specify PUT request");
-            }
-            auto stringResult = data.dump(-1);
-            //spdlog::debug(stringResult);
-            returnCode = curl_easy_setopt(curl, CURLOPT_POSTFIELDS, stringResult.c_str());
-            if (returnCode != CURLE_OK)
-            {
-                throw std::runtime_error("Failed to set post fields");
-            }
-            //curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, -1L);
-            curl_easy_setopt(curl, CURLOPT_VERBOSE, 0L); // Set to 1L to make it talkative
-            //curl_easy_setopt(curl, CURLOPT_POSTFIELDS, ="name=danial&project=curl");
-            returnCode = curl_easy_perform(curl);
-            if (returnCode != CURLE_OK)
-            {
-                errorMessage = std::string {curl_easy_strerror(returnCode)};
-                spdlog::warn(errorMessage); 
-            }
-            // Unpack the payload
-            auto apiResponse = outputStream.str();
-            try
-            {
-                 jsonResponse = nlohmann::json::parse(apiResponse);
-            }
-            catch (const std::exception &e)
-            {
-                spdlog::info(apiResponse);
-                spdlog::warn("Failed to parse result from API; failed with "
-                           + std::string {e.what()});
-                errorMessage = "Could not parse result from API";
-            }
-
-            curl_slist_free_all(headerList);
-            curl_easy_cleanup(curl);
-        }   
+            uri = mAPIURL + "Yellowstone";
+        }
         else
         {
-            errorMessage = "Error initializing curl";
-        }   
-        curl_global_cleanup();
-        if (!errorMessage.empty())
-        {
-            throw std::runtime_error("CURL request failed with: " + errorMessage);
+            uri = mAPIURL + "Utah";
         }
-        return jsonResponse;
-    }
-
+        constexpr bool verbose{false};
+        return ::sendPutJSONRequest(uri, mAPIAccessKey, data, verbose);
+    } 
     std::shared_ptr<MLReview::Database::Connection::MongoDB>
         mMongoDBConnection{nullptr};
     std::string mAPIURL;
@@ -562,22 +474,56 @@ AcceptEventToAWS::processRequest(const nlohmann::json &request)
                 std::string message;
                 if (jsonResponse.contains("message"))
                 {
-                    message = jsonResponse["message"].template get<std::string> ();
+                    message
+                        = jsonResponse["message"].template get<std::string> ();
                 }
-                auto statusCode = jsonResponse["statusCode"].template get<int> ();
+                auto statusCode
+                    = jsonResponse["statusCode"].template get<int> ();
                 if (statusCode >= 400 && statusCode < 500)
                 {
                     spdlog::warn(
                         "Failed to accept event because of malformed request; "
                       + message);
+                    auto errorResponse
+                         = std::make_unique <MLReview::Messages::Error> ();
+                    errorResponse->setMessage(
+                        "Did not accept event at AWS because of client error");
+                    errorResponse->setStatusCode(500);
+                    return errorResponse;
                 }
                 else if (statusCode >= 500)
                 {
-                    spdlog::warn("Server-side error; " + message);
+                    spdlog::warn(
+                         "Failed to accept event because of server-side error; "
+                        + message);
+                    auto errorResponse
+                        = std::make_unique <MLReview::Messages::Error> ();
+                    errorResponse->setMessage(
+                        "Did not accept event at AWS because of server error");
+                    errorResponse->setStatusCode(500);
+                    return errorResponse;
                 }
                 else
                 {
-                    spdlog::info("Successfully accepted event " + message);
+                    spdlog::info(
+                        "Successfully submitted " 
+                      + std::to_string(mongoIdentifier) 
+                      + " to AWS.  Reply message from API was: "
+                      + message);
+                }
+                // Now update MongoDB
+                try
+                {
+                    constexpr bool submitted{true};
+                    ::updateEventSubmittedInMongoDB(*pImpl->mMongoDBConnection,
+                                                    mongoIdentifier,
+                                                    collectionName,
+                                                    submitted);
+                }
+                catch (const std::exception &e)
+                {
+                    spdlog::warn("Failed to update MongoDB; failed with: "
+                               + std::string {e.what()});
                 }
             }
         }
@@ -585,8 +531,10 @@ AcceptEventToAWS::processRequest(const nlohmann::json &request)
         {
             spdlog::warn(e.what());
             // Return 500 error
-            auto errorResponse = std::make_unique <MLReview::Messages::Error> ();
-            errorResponse->setMessage("Internal error detected when interacting with AWS REST API");
+            auto errorResponse
+                = std::make_unique <MLReview::Messages::Error> ();
+            errorResponse->setMessage(
+                "Internal error detected when interacting with AWS REST API");
             errorResponse->setStatusCode(500); 
             return errorResponse;  
         }
@@ -597,10 +545,24 @@ AcceptEventToAWS::processRequest(const nlohmann::json &request)
                                   + std::to_string(mongoIdentifier)
                                   + " does not exist");
     }
-
     auto responseMessage = "Successfully propagated "
                          + std::to_string(mongoIdentifier)
                          + " to AWS";
     auto response = std::make_unique<::Response> (responseMessage); 
     return response;
 }
+
+[[nodiscard]] std::string AcceptEventToAWS::getDocumentation() const noexcept
+{
+    return R"""(
+Accepts an event to AWS.  This additionally will update the event's event
+information in the MongoDB to indicate that the event has been accepted 
+as real.  To use PUT a JSON request of the form:
+
+{"resource": "actions/acceptEventToAWS", "identifier": ml_event_identifier}
+
+where ml_event_identifier is the integral machine learning catalog's event
+identifier.
+)""";
+}
+

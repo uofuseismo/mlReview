@@ -24,7 +24,7 @@ public:
     /// @result The resource's name.
     [[nodiscard]] std::string getName() const noexcept override final;
     /// @result The resource's documentation.
-    //[[nodiscard]] std::string getDocumentation() const noexcept override final;
+    [[nodiscard]] std::string getDocumentation() const noexcept override final;
 
     AcceptEventToAWS(const AcceptEventToAWS &) = delete;
     AcceptEventToAWS& operator=(const AcceptEventToAWS &) = delete;
