@@ -43,6 +43,7 @@ if (${OPENSSL_FOUND})
    message("Found SSL version ${OPENSSL_VERSION}")
 endif()
 
+
 set(LIBRARY_SRC
     src/service/catalog/arrival.cpp
     src/service/catalog/event.cpp
@@ -93,6 +94,11 @@ if (${SFF_FOUND})
    target_compile_definitions(mlReview PRIVATE WITH_SFF)
    target_include_directories(mlReview PRIVATE ${SFF_INCLUDE_DIRECTORY})
    target_link_libraries(mlReview PRIVATE ${SFF_LIBRARY})
+endif()
+string(COMPARE GREATER_EQUAL ${MINISEED_VERSION} "3.1.5" USE_MS_VERSION_315)
+if (USE_MS_VERSION_315)
+   message("Using ms_sid2nslc_n")
+   target_compile_definitions(mlReview PRIVATE USE_MS_VERSION_315)
 endif()
 
 

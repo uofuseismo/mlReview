@@ -34,10 +34,19 @@ MLReview::WaveServer::Waveform unpack(char *data, size_t dataLength,
             std::fill(stationWork.begin(), stationWork.end(), '\0');
             std::fill(channelWork.begin(), channelWork.end(), '\0');
             std::fill(locationCodeWork.begin(), locationCodeWork.end(), '\0');
+#ifdef USE_MS_VERSION_315
+            returnCode
+                = ms_sid2nslc_n(msr->sid,
+                                networkWork.data(), networkWork.size(),
+                                stationWork.data(), stationWork.size(),
+                                locationCodeWork.data(), locationCodeWork.size(),
+                                channelWork.data(), channelWork.size());
+#else
             returnCode
                 = ms_sid2nslc(msr->sid,
                               networkWork.data(), stationWork.data(),
                               locationCodeWork.data(), channelWork.data());
+#endif
             if (returnCode != MS_NOERROR)
             {
                 if (msr){msr3_free(&msr);}
