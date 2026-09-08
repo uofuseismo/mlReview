@@ -145,10 +145,14 @@ target_link_libraries(mlReviewBackend
                               Boost::iostreams
                               spdlog::spdlog
                               GeographicLib::GeographicLib
-                              mongo::mongocxx_shared mongo::bsoncxx_shared
                               #jwt-cpp::jwt-cpp
                               ${uAuthenticator_LIBRARY}
                               ${CURL_LIBRARIES} ${LDAP_LIBRARY} ${LBER_LIBRARY} ${MINISEED_LIBRARY} ${SFF_LIBRARY})
+if (${BUILD_SHARED_LIBS})
+   target_link_libraries(mlReviewBackend PRIVATE mongo::mongocxx_shared mongo::bsoncxx_shared)
+else()
+   target_link_libraries(mlReviewBackend PRIVATE mongo::mongocxx_static mongo::bsoncxx_static)
+endif()
 target_include_directories(mlReviewBackend
                            PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src
                                    ${CMAKE_CURRENT_SOURCE_DIR}/include
