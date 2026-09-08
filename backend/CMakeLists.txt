@@ -6,8 +6,7 @@ option(ENABLE_SSL "Enable SSL connections" OFF)
 option(WITH_CORS "Compile with CORS *" OFF)
 option(UUSS_SRC "Enable UUSS-specific source" ON)
 option(COMPILE_DATABASE_UTILITIES "Utilites for interacting with the datbase" OFF)
-#cmake -DBUILD_SHARED_LIBS=YES /path/to/source
-set(BUILD_SHARED_LIBS YES)
+option(BUILD_SHARED_LIBS "Build shared libraries" ON)
 
 include(CheckCXXCompilerFlag)
 set(CMAKE_CXX_STANDARD 20) 
