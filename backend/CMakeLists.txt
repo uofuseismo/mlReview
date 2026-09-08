@@ -170,7 +170,7 @@ endif()
 if (${ZLIB_FOUND})
    message("Linking to libz")
    target_compile_definitions(mlReviewBackend PUBLIC WITH_ZLIB)
-   target_link_libraries(mlReviewBackend PRIVATE ${ZLIB_LIBRARIES})
+   target_link_libraries(mlReviewBackend PRIVATE ZLIB::ZLIB)
    #target_include_directories(mlReviewBackend PRIVATE ${ZLIB_INCLUDE_DIRS})
 endif()
 
