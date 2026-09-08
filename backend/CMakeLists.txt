@@ -151,7 +151,7 @@ target_link_libraries(mlReviewBackend
 if (${BUILD_SHARED_LIBS})
    target_link_libraries(mlReviewBackend PRIVATE mongo::mongocxx_shared mongo::bsoncxx_shared)
 else()
-   target_link_libraries(mlReviewBackend PRIVATE mongo::mongocxx_static mongo::bsoncxx_static)
+   target_link_libraries(mlReviewBackend PRIVATE mongo::mongoccxx_static mongo::bsoncxx_static)
 endif()
 target_include_directories(mlReviewBackend
                            PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src
