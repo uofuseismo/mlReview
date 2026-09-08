@@ -72,7 +72,11 @@ if (${DataLinkClient_FOUND})
    message("Found DataLinkClient library")
    set(LIBRARY_SRC ${LIBRARY_SRC} src/waveServer/dataLink.cpp)
 endif()
-add_library(mlReview ${LIBRARY_SRC})
+if (${BUILD_SHARED_LIBS})
+   add_library(mlReview SHARED ${LIBRARY_SRC})
+else()
+   add_library(mlReview STATIC ${LIBRARY_SRC})
+endif()
 target_link_libraries(mlReview
                       PRIVATE SOCI::Core SOCI::PostgreSQL
                               mongo::mongocxx_shared mongo::bsoncxx_shared
