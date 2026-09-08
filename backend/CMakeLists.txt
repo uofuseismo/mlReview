@@ -23,7 +23,7 @@ find_package(spdlog REQUIRED)
 find_package(nlohmann_json 3.2.0 REQUIRED)
 find_package(LibXml2 REQUIRED)
 find_package(GeographicLib REQUIRED)
-find_package(Boost COMPONENTS program_options date_time iostreams system REQUIRED)
+find_package(Boost COMPONENTS program_options date_time iostreams REQUIRED)
 #find_package(jwt-cpp 0.7.0...2.1.0 REQUIRED)
 find_package(PostgreSQL REQUIRED)
 find_package(OpenLdap REQUIRED)
@@ -136,7 +136,6 @@ target_link_libraries(mlReviewBackend
                               Boost::date_time
                               Boost::program_options
                               Boost::iostreams
-                              Boost::system
                               spdlog::spdlog
                               GeographicLib::GeographicLib
                               mongo::mongocxx_shared mongo::bsoncxx_shared

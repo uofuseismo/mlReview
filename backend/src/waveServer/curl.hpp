@@ -51,6 +51,12 @@ public:
             clear();
             throw std::runtime_error("Failed to set timeout");
         }
+        code = curl_easy_setopt(mCurl, CURLOPT_SSL_VERIFYPEER, 0L);
+        if (code != CURLE_OK)
+        {   
+            clear();
+            throw std::runtime_error("Failed to set timeout");
+        }
     }
     /// Gets data from a URL and puts the result in a std::string as a buffer.
     [[nodiscard]] std::string get(const std::string &url)
@@ -76,7 +82,9 @@ public:
         if (code != CURLE_OK)
         {
             clear();
-            throw std::runtime_error("Failed to get data from: " + url);
+            auto errorMessage = std::string {curl_easy_strerror(code)};
+            throw std::runtime_error("Failed to get data from: " + url 
+                                   + " CURL failed with: " + errorMessage);
         }
         return outputStream.str();
     }

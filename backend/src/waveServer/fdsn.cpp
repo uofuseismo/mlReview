@@ -61,9 +61,9 @@ std::string toDateTime(const std::chrono::microseconds &utcTimeMuS)
 class FDSN::FDSNImpl
 {
 public:
-    std::string mURL{"https://service.iris.edu/"};
-    std::string mService{"fdsnws"};
-    int mVersion{VERSION};
+    std::string mURL{"https://service.earthscope.org/fdsnws/dataselect/1/query"};
+    //std::string mService{"fdsnws"};
+    //int mVersion{VERSION};
 };
 
 /// Default constructor
@@ -78,7 +78,7 @@ FDSN::FDSN(const std::string &url) :
 {
     if (url.empty()){throw std::invalid_argument("URL is empty");} 
     pImpl->mURL = url;
-    if (pImpl->mURL.back() != '/'){pImpl->mURL = pImpl->mURL + "/";}
+//    if (pImpl->mURL.back() != '/'){pImpl->mURL = pImpl->mURL + "/";}
 }
 
 Waveform FDSN::getData(const Request &request) const
@@ -105,17 +105,17 @@ Waveform FDSN::getData(const Request &request) const
     {
         locationCode = request.getLocationCode();
     }
-    auto query = pImpl->mURL + pImpl->mService
-               + "/dataselect/" + std::to_string(pImpl->mVersion)
-               + "/query?network=" + request.getNetwork()
+    auto query = pImpl->mURL //+ pImpl->mService
+               //+ "/dataselect/" + std::to_string(pImpl->mVersion)
+               //+ "/query
+               + "?network=" + request.getNetwork()
                + "&station=" + request.getStation()
                + "&channel=" + request.getChannel()
                + "&location=" + locationCode
                + "&starttime=" + ::toDateTime(request.getStartTime())
                + "&endtime=" + ::toDateTime(request.getEndTime())
                + "&nodata=404";
-    //std::cout << query << std::endl;
-    spdlog::debug("Performing FDSN query: " + query);
+    spdlog::info("Performing FDSN query: " + query);
     std::string payload;
     try
     {
@@ -124,7 +124,7 @@ Waveform FDSN::getData(const Request &request) const
         auto waveform = ::unpack(payload);
         waveform.mergeSegments();
         result = std::move(waveform);
-        if (result.getNumberOfSegments() > 0){spdlog::info("success: " + query);}
+        if (result.getNumberOfSegments() > 0){spdlog::debug("success: " + query);}
 //std::cout << payload << std::endl;
 //std::cout << payload.size() << std::endl;
 /*
@@ -142,7 +142,8 @@ std::cout<< obj << std::endl;
     }
     catch (const std::exception &e)
     {
-        auto error = "CURL request failed with: " + std::string{e.what()};
+        auto error = "CURL request failed with: "
+                   + std::string{e.what()};
         throw std::runtime_error(error);
     }
     return result;

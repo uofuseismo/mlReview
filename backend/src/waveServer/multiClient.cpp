@@ -226,7 +226,9 @@ Waveform MultiClient::getData(const Request &request) const
         catch (const std::exception &e)
         {
             spdlog::warn("Failed to request data from client: "
-                       + client.second->getType()); 
+                       + client.second->getType());
+            //           + ".  Failed with "
+            //           + std::string {e.what()}); 
         } 
     }
     return result;

@@ -1,3 +1,4 @@
+#include <iostream>
 #include <string>
 #include <soci/soci.h>
 #include <soci/postgresql/soci-postgresql.h>

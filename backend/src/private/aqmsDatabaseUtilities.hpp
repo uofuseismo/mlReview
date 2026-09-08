@@ -165,6 +165,7 @@ toArrivalsAndAssociations(const MLReview::Service::Catalog::Event &event,
             aqmsArrival.setTime(arrival.getTime());
             aqmsArrival.setSubSource(subSource);
             aqmsArrival.setAuthority(authority);
+            aqmsArrival.setQuality(weight);
             aqmsArrival.setReviewFlag(MLReview::Database::AQMS::Arrival::ReviewFlag::Automatic);
             if (!isAutomatic)
             {
@@ -280,7 +281,7 @@ std::optional<int64_t>
 R"'''(
 SELECT event.evid, origin.lat, origin.lon, origin.depth, TrueTime.getEpoch(origin.datetime, 'NOMINAL') FROM event 
  INNER JOIN origin ON event.prefor = origin.orid 
-WHERE TrueTime.getEpoch(origin.datetime, 'NOMINAL') BETWEEN :startTime AND :endTime;
+WHERE event.selectflag = 1 AND TrueTime.getEpoch(origin.datetime, 'NOMINAL') BETWEEN :startTime AND :endTime;
 )'''"
     };
     soci::rowset<soci::row> eventRows
