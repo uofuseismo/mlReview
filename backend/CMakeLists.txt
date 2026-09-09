@@ -207,8 +207,7 @@ if (${COMPILE_DATABASE_UTILITIES})
                              PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src
                                      ${CMAKE_CURRENT_SOURCE_DIR}/include
                                      ${PostgreSQL_INCLUDE_DIRS}
-                                     ${OPENLDAP_INCLUDE_DIR}
-                                     ${MINISEED_INCLUDE_DIR}
+                                     mseed::mseed
                                      Boost::headers)
   set_target_properties(eventBuilder PROPERTIES
                         CXX_STANDARD 20
