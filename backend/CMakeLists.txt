@@ -150,7 +150,7 @@ add_executable(mlReviewBackend
 target_link_libraries(mlReviewBackend
                       PUBLIC nlohmann_json::nlohmann_json
                       PRIVATE mlReview
-                              SOCI::PostgreSQL
+                              SOCI::PostgreSQL SOCI::Core
                               Boost::date_time
                               Boost::program_options
                               Boost::iostreams
