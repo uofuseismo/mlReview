@@ -83,7 +83,6 @@ else()
 endif()
 target_link_libraries(mlReview
                       PRIVATE SOCI::Core SOCI::PostgreSQL
-                              mongo::mongocxx_shared mongo::bsoncxx_shared
                               GeographicLib::GeographicLib
                               nlohmann_json::nlohmann_json
                               LibXml2::LibXml2
@@ -92,8 +91,10 @@ target_link_libraries(mlReview
                               DataLinkClient::DataLinkClient)
 if (${BUILD_SHARED_LIBS})
    target_link_libraries(mlReview PRIVATE mseed::mseed)
+   target_link_libraries(mlReview PRIVATE mongo::mongocxx_shared mongo::bsoncxx_shared)
 else()
    target_link_libraries(mlReview PRIVATE mseed::mseed_static)
+   target_link_libraries(mlReview PRIVATE mongo::mongocxx_static mongo::bsoncxx_static)
 endif()
 target_include_directories(mlReview
                            PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src
