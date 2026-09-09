@@ -17,6 +17,8 @@ if (NOT ${BUILD_SHARED_LIBS})
    set(Boost_USE_STATIC_LIBS ON) 
    set(OPENSSL_USE_STATIC_LIBS TRUE)
    set(GeographicLib_USE_STATIC_LIBS ON)
+   set(LibXml2_USE_STATIC_LIBS TRUE)
+   set(CURL_USE_STATIC_LIBS ON)
 endif()
 
 set(THREADS_PREFER_PTHREAD_FLAG ON) 
@@ -30,9 +32,10 @@ find_package(GeographicLib REQUIRED)
 find_package(Boost COMPONENTS program_options date_time iostreams REQUIRED)
 #find_package(jwt-cpp 0.7.0...2.1.0 REQUIRED)
 find_package(PostgreSQL REQUIRED)
-find_package(OpenLdap REQUIRED)
+#find_package(OpenLDAP REQUIRED)
 find_package(CURL REQUIRED)
-find_package(MiniSEED REQUIRED)
+#find_package(MiniSEED REQUIRED)
+find_package(libmseed REQUIRED)
 find_package(uAuthenticator REQUIRED)
 find_package(DataLinkClient)
 find_package(Catch2 3)
@@ -82,16 +85,23 @@ target_link_libraries(mlReview
                       PRIVATE SOCI::Core SOCI::PostgreSQL
                               mongo::mongocxx_shared mongo::bsoncxx_shared
                               GeographicLib::GeographicLib
-                              nlohmann_json::nlohmann_json ${LIBXML2_LIBRARIES}
-                              ${CURL_LIBRARIES} ${LDAP_LIBRARY} ${LBER_LIBRARY} ${MINISEED_LIBRARY} ${DataLinkClient_LIBRARY})
+                              nlohmann_json::nlohmann_json
+                              LibXml2::LibXml2
+                              ${CURL_LIBRARIES}
+                              ${LDAP_LIBRARY} ${LBER_LIBRARY}
+                              DataLinkClient::DataLinkClient)
+if (${BUILD_SHARED_LIBS})
+   target_link_libraries(mlReview PRIVATE mseed::mseed)
+else()
+   target_link_libraries(mlReview PRIVATE mseed::mseed_static)
+endif()
 target_include_directories(mlReview
                            PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src
                                    ${CMAKE_CURRENT_SOURCE_DIR}/include
                                    ${PostgreSQL_INCLUDE_DIRS}
                                    ${CURL_INCLUDE_DIR}
-                                   ${MINISEED_INCLUDE_DIR}
                                    ${DataLinkClient_INCLUDE_DIR}
-                                   ${LIBXML2_INCLUDE_DIR}
+                                   LibXml2::LibXml2
                                    Boost::headers)
 set_target_properties(mlReview PROPERTIES
                       CXX_STANDARD 20
@@ -103,7 +113,7 @@ if (${SFF_FOUND})
    target_include_directories(mlReview PRIVATE ${SFF_INCLUDE_DIRECTORY})
    target_link_libraries(mlReview PRIVATE ${SFF_LIBRARY})
 endif()
-string(COMPARE GREATER_EQUAL ${MINISEED_VERSION} "3.1.5" USE_MS_VERSION_315)
+#string(COMPARE GREATER_EQUAL ${MINISEED_VERSION} "3.1.5" USE_MS_VERSION_315)
 if (USE_MS_VERSION_315)
    message("Using ms_sid2nslc_n")
    target_compile_definitions(mlReview PRIVATE USE_MS_VERSION_315)
@@ -144,7 +154,7 @@ target_link_libraries(mlReviewBackend
                               Boost::date_time
                               Boost::program_options
                               Boost::iostreams
-                              spdlog::spdlog
+                              spdlog::spdlog_header_only
                               GeographicLib::GeographicLib
                               #jwt-cpp::jwt-cpp
                               ${uAuthenticator_LIBRARY}
@@ -160,7 +170,6 @@ target_include_directories(mlReviewBackend
                                    ${PostgreSQL_INCLUDE_DIRS}
                                    ${OPENLDAP_INCLUDE_DIR}
                                    ${CURL_INCLUDE_DIR}
-                                   ${MINISEED_INCLUDE_DIR}
                                    ${uAuthenticator_INCLUDE_DIR}
                                    Boost::headers)
 set_target_properties(mlReviewBackend PROPERTIES
@@ -196,7 +205,6 @@ if (${COMPILE_DATABASE_UTILITIES})
                                      ${CMAKE_CURRENT_SOURCE_DIR}/include
                                      ${PostgreSQL_INCLUDE_DIRS}
                                      ${OPENLDAP_INCLUDE_DIR}
-                                     ${CURL_INCLUDE_DIR}
                                      ${MINISEED_INCLUDE_DIR}
                                      Boost::headers)
   set_target_properties(eventBuilder PROPERTIES
