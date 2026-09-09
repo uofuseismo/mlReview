@@ -101,7 +101,6 @@ target_include_directories(mlReview
                                    ${CMAKE_CURRENT_SOURCE_DIR}/include
                                    ${PostgreSQL_INCLUDE_DIRS}
                                    ${CURL_INCLUDE_DIR}
-                                   ${DataLinkClient_INCLUDE_DIR}
                                    LibXml2::LibXml2
                                    Boost::headers)
 set_target_properties(mlReview PROPERTIES
@@ -157,21 +156,20 @@ target_link_libraries(mlReviewBackend
                               Boost::iostreams
                               spdlog::spdlog_header_only
                               GeographicLib::GeographicLib
-                              #jwt-cpp::jwt-cpp
-                              ${uAuthenticator_LIBRARY}
+                              uAuthenticator::libuAuthenticator
+                              #${uAuthenticator_LIBRARY}
                               ${CURL_LIBRARIES} ${LDAP_LIBRARY} ${LBER_LIBRARY} ${MINISEED_LIBRARY} ${SFF_LIBRARY})
-#if (${BUILD_SHARED_LIBS})
+if (${BUILD_SHARED_LIBS})
    target_link_libraries(mlReviewBackend PRIVATE mongo::mongocxx_shared mongo::bsoncxx_shared)
-#else()
-#   target_link_libraries(mlReviewBackend PRIVATE mongo::mongoccxx_static mongo::bsoncxx_static)
-#endif()
+else()
+   target_link_libraries(mlReviewBackend PRIVATE mongo::mongoccxx_static mongo::bsoncxx_static)
+endif()
 target_include_directories(mlReviewBackend
                            PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src
                                    ${CMAKE_CURRENT_SOURCE_DIR}/include
                                    ${PostgreSQL_INCLUDE_DIRS}
                                    ${OPENLDAP_INCLUDE_DIR}
                                    ${CURL_INCLUDE_DIR}
-                                   ${uAuthenticator_INCLUDE_DIR}
                                    Boost::headers)
 set_target_properties(mlReviewBackend PROPERTIES
                       CXX_STANDARD 20
@@ -199,8 +197,12 @@ if (${COMPILE_DATABASE_UTILITIES})
                                 Boost::date_time
                                 Boost::program_options
                                 spdlog::spdlog
-                                nlohmann_json::nlohmann_json
-                                mongo::mongocxx_shared mongo::bsoncxx_shared)
+                                nlohmann_json::nlohmann_json)
+  if (${BUILD_SHARED_LIBS})
+     target_link_libraries(eventBuilder PRIVATE mongo::mongocxx_shared mongo::bsoncxx_shared)
+  else()
+     target_link_libraries(eventBuilder PRIVATE mongo::mongocxx_static mongo::bsoncxx_static)
+  endif()
   target_include_directories(eventBuilder
                              PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src
                                      ${CMAKE_CURRENT_SOURCE_DIR}/include
